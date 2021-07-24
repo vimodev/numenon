@@ -1,0 +1,115 @@
+package engine.graphics.shaders;
+
+import engine.Loader;
+import org.lwjgl.opengl.GL20;
+import utility.Config;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import static org.lwjgl.opengl.GL20.*;
+
+/**
+ * Abstract class to load and manage shaders
+ */
+public abstract class Shader {
+
+    private int shaderProgram;
+    private int vertexShaderID;
+    private int fragmentShaderID;
+
+    /**
+     * Creates a shader without geometry shader
+     * @param vertexShaderFile
+     * @param fragmentShaderFile
+     */
+    public Shader(String vertexShaderFile, String fragmentShaderFile) {
+        // Create the shaders in opengl
+        shaderProgram = glCreateProgram();
+        vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+        fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+        // Load and compile the shaders
+        glShaderSource(vertexShaderID, readShaderFile(vertexShaderFile));
+        glShaderSource(fragmentShaderID, readShaderFile(fragmentShaderFile));
+        glCompileShader(vertexShaderID);
+        glCompileShader(fragmentShaderID);
+
+        // Check for errors
+        if (glGetShaderi(vertexShaderID, GL_COMPILE_STATUS) == GL_FALSE) {
+            System.err.println(glGetShaderInfoLog(vertexShaderID));
+        }
+        if (glGetShaderi(fragmentShaderID, GL_COMPILE_STATUS) == GL_FALSE) {
+            System.err.println(glGetShaderInfoLog(fragmentShaderID));
+        }
+
+        // Attach the shaders to the program
+        glAttachShader(shaderProgram, vertexShaderID);
+        glAttachShader(shaderProgram, fragmentShaderID);
+        glLinkProgram(shaderProgram);
+        glValidateProgram(shaderProgram);
+        Loader.declareShader(this);
+    }
+
+    public void use() {
+        GL20.glUseProgram(shaderProgram);
+    }
+
+    public void unuse() {
+        GL20.glUseProgram(0);
+    }
+
+    /**
+     * Clean up this shader
+     */
+    public void cleanUp() {
+        unuse();
+        GL20.glDetachShader(shaderProgram, vertexShaderID);
+        GL20.glDetachShader(shaderProgram, fragmentShaderID);
+        GL20.glDeleteShader(vertexShaderID);
+        GL20.glDeleteShader(fragmentShaderID);
+        GL20.glDeleteProgram(shaderProgram);
+    }
+
+    protected abstract void bindAttributes();
+
+    /**
+     * Bind the vbo at the given attribute number to a variable in glsl
+     * @param attribute
+     * @param variableName
+     */
+    protected void bindAttribute(int attribute, String variableName) {
+        GL20.glBindAttribLocation(shaderProgram, attribute, variableName);
+    }
+
+    /**
+     * Read a shader file into a OpenGL shader
+     * @param filename of shader file
+     * @return String contents of shader
+     */
+    String readShaderFile(String filename) {
+        // We use a string builder to easily compose a string
+        StringBuilder sb = new StringBuilder();
+        // We try to read the file
+        try {
+            // Read the file
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(
+                            getClass().getResource(Config.SHADER_LOCATION + filename).openStream()));
+            // Read the first line
+            String line = reader.readLine();
+            // If it is not empty we start looping
+            while (line != null) {
+                sb.append(line); sb.append("\n");
+                line = reader.readLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Could not read shader file.");
+            e.printStackTrace();
+        }
+        // Convert the string builder instance to a string
+        return sb.toString();
+    }
+
+}

@@ -53,6 +53,7 @@ public class Renderer {
             shader.setUniform("lightPositions[" + lights.indexOf(light) + "]", light.getPosition());
             shader.setUniform("lightAmbients[" + lights.indexOf(light) + "]", light.getAmbient());
             shader.setUniform("lightDiffuses[" + lights.indexOf(light) + "]", light.getDiffuse());
+            shader.setUniform("lightAttenuations[" + lights.indexOf(light) + "]", light.getAttenuation());
         }
         // Set material uniforms
         shader.setUniform("materialAmbient", material.getAmbient());

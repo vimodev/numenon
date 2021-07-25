@@ -31,6 +31,15 @@ public class World {
         return null;
     }
 
+    public Light getLightByName(String name) {
+        for (Light light : lights) {
+            if (light.getName() == name) {
+                return light;
+            }
+        }
+        return null;
+    }
+
     public String getName() {
         return name;
     }

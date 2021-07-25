@@ -12,6 +12,7 @@ uniform int numberOfLights;
 uniform vec3 lightPositions[256];
 uniform vec3 lightAmbients[256];
 uniform vec3 lightDiffuses[256];
+uniform vec3 lightAttenuations[256];
 // Material stuff
 uniform vec3 materialAmbient;
 uniform vec3 materialDiffuse;
@@ -31,12 +32,18 @@ vec4 lighting(int light_index) {
     return colour_to_apply;
 }
 
+float attenuation(int light_index) {
+    float distance = length(lightPositions[light_index] - pass_position);
+    vec3 attenuation = lightAttenuations[light_index];
+    return max(exp(-pow(distance * attenuation.x - attenuation.y, attenuation.z)), 1);
+}
+
 void main() {
     // Initialize pixel colour to black
     pixel_colour = vec4(0, 0, 0, 1);
     // Apply lighting for all lights
     for (int i = 0; i < numberOfLights; i++) {
-        pixel_colour = pixel_colour + lighting(i);
+        pixel_colour = pixel_colour + attenuation(i) * lighting(i);
     }
     // Apply texture
     pixel_colour = pixel_colour * texture(textureSampler, mod(pass_position.xz / 25, 1));

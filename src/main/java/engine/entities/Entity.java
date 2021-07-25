@@ -1,5 +1,6 @@
 package engine.entities;
 
+import engine.graphics.Material;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
 import org.joml.Matrix4f;
@@ -15,6 +16,7 @@ public abstract class Entity {
     protected Vector3f scale;
     protected Vector3f rotation;
     protected Shader shader;
+    protected Material material;
 
     public Entity(String name, Vector3f position, Vector3f scale, Vector3f rotation) {
         this.name = name;
@@ -37,6 +39,14 @@ public abstract class Entity {
 
     public Shader getShader() {
         return shader;
+    }
+
+    public Material getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(Material material) {
+        this.material = material;
     }
 
     public String getName() {

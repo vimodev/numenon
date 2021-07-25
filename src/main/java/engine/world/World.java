@@ -1,5 +1,7 @@
-package engine;
+package engine.world;
 
+import engine.Camera;
+import engine.graphics.Light;
 import engine.entities.Entity;
 
 import java.util.ArrayList;
@@ -16,6 +18,15 @@ public class World {
         entities = new ArrayList<>();
         lights = new ArrayList<>();
         this.name = name;
+    }
+
+    public Entity getEntityByName(String name) {
+        for (Entity entity : entities) {
+            if (entity.getName() == name) {
+                return entity;
+            }
+        }
+        return null;
     }
 
     public String getName() {

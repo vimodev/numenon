@@ -1,3 +1,5 @@
+package utility;
+
 /**
  * Timer to be used to determine fps and such
  * @Author Vincent Moonen

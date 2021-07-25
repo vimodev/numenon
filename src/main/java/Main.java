@@ -1,16 +1,18 @@
 import engine.Camera;
-import engine.Light;
+import engine.graphics.Light;
 import engine.Loader;
-import engine.World;
+import engine.world.World;
 import engine.entities.Entity;
 import engine.entities.TestEntity;
 import engine.graphics.Renderer;
+import engine.world.WorldBuilder;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import utility.Config;
 import utility.Global;
+import utility.Timer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -79,15 +81,7 @@ public class Main {
      */
     public void loop() {
 
-        World world = new World("test");
-        Entity entity = new TestEntity("test", new Vector3f(0, 0, -100),new Vector3f(5), new Vector3f(0));
-        Entity entity2 = new TestEntity("test2", new Vector3f(-50, 5, -100),new Vector3f(5), new Vector3f(0));
-        Camera camera = new Camera();
-        world.setCamera(camera);
-        world.addEntity(entity);
-        world.addEntity(entity2);
-        world.addLight(new Light("light_0", new Vector3f(0, 10, 0), new Vector3f(0.01f), new Vector3f(1f), new Vector3f(0)));
-        world.addLight(new Light("light_1", new Vector3f(0, 10, -150), new Vector3f(0.01f), new Vector3f(1f), new Vector3f(0)));
+        World world = WorldBuilder.testWorld1();
 
         double dt = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
@@ -95,8 +89,8 @@ public class Main {
 
             Renderer.pre();
 
-            camera.move();
-            entity.rotate(new Vector3f(0, 1f, 0));
+            world.getCamera().move();
+            world.getEntityByName("test").rotate(new Vector3f(0, 1f, 0));
             Renderer.render(world);
 
             glfwSwapBuffers(window.getWindow()); // swap the color buffers

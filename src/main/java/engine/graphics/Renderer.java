@@ -1,8 +1,7 @@
 package engine.graphics;
 
 import engine.Camera;
-import engine.Light;
-import engine.World;
+import engine.world.World;
 import engine.entities.Entity;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
@@ -38,6 +37,7 @@ public class Renderer {
     public static void render(Entity entity, Camera camera, List<Light> lights) {
         Model model = entity.getModel();
         Shader shader = entity.getShader();
+        Material material = entity.getMaterial();
         shader.use();
         GL30.glBindVertexArray(model.getVaoID());
         GL20.glEnableVertexAttribArray(0);
@@ -53,11 +53,18 @@ public class Renderer {
             shader.setUniform("lightPositions[" + lights.indexOf(light) + "]", light.getPosition());
             shader.setUniform("lightAmbients[" + lights.indexOf(light) + "]", light.getAmbient());
             shader.setUniform("lightDiffuses[" + lights.indexOf(light) + "]", light.getDiffuse());
-            shader.setUniform("lightSpeculars[" + lights.indexOf(light) + "]", light.getSpecular());
         }
+        // Set material uniforms
+        shader.setUniform("materialAmbient", material.getAmbient());
+        shader.setUniform("materialDiffuse", material.getDiffuse());
+        // Set camera position for easy access
+        shader.setUniform("cameraPosition", camera.getPosition());
+        // Bind texture
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getTextureID());
+        // Actually render
         GL11.glDrawElements(GL11.GL_TRIANGLES, model.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+        // Unbind everything
         GL20.glDisableVertexAttribArray(0);
         GL20.glDisableVertexAttribArray(1);
         GL20.glDisableVertexAttribArray(2);

@@ -1,4 +1,4 @@
-package engine;
+package engine.graphics;
 
 import org.joml.Vector3f;
 
@@ -8,14 +8,12 @@ public class Light {
     protected Vector3f position;
     protected Vector3f ambient;
     protected Vector3f diffuse;
-    protected Vector3f specular;
 
-    public Light(String name, Vector3f position, Vector3f ambient, Vector3f diffuse, Vector3f specular) {
+    public Light(String name, Vector3f position, Vector3f ambient, Vector3f diffuse) {
         this.name = name;
         this.position = position;
         this.ambient = ambient;
         this.diffuse = diffuse;
-        this.specular = specular;
     }
 
     public String getName() {
@@ -48,13 +46,5 @@ public class Light {
 
     public void setDiffuse(Vector3f diffuse) {
         this.diffuse = diffuse;
-    }
-
-    public Vector3f getSpecular() {
-        return specular;
-    }
-
-    public void setSpecular(Vector3f specular) {
-        this.specular = specular;
     }
 }

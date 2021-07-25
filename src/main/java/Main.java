@@ -1,5 +1,6 @@
 import engine.Camera;
 import engine.Loader;
+import engine.World;
 import engine.entities.Entity;
 import engine.entities.TestEntity;
 import engine.graphics.Renderer;
@@ -77,8 +78,13 @@ public class Main {
      */
     public void loop() {
 
+        World world = new World("test");
         Entity entity = new TestEntity("test", new Vector3f(0, 0, -100),new Vector3f(5), new Vector3f(0));
+        Entity entity2 = new TestEntity("test2", new Vector3f(-50, 5, -100),new Vector3f(5), new Vector3f(0));
         Camera camera = new Camera();
+        world.setCamera(camera);
+        world.addEntity(entity);
+        world.addEntity(entity2);
 
         double dt = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
@@ -88,7 +94,7 @@ public class Main {
 
             camera.move();
             entity.rotate(new Vector3f(0, 1f, 0));
-            Renderer.render(entity, camera);
+            Renderer.render(world);
 
             glfwSwapBuffers(window.getWindow()); // swap the color buffers
             // Poll for window events. The key callback above will only be

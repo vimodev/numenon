@@ -1,6 +1,7 @@
 package engine.graphics;
 
 import engine.Camera;
+import engine.World;
 import engine.entities.Entity;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
@@ -23,6 +24,12 @@ public class Renderer {
         glCullFace(GL_BACK);
         GL11.glClearColor(1, 0, 0, 1);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    public static void render(World world) {
+        for (Entity entity : world.getEntities()) {
+            render(entity, world.getCamera());
+        }
     }
 
     public static void render(Entity entity, Camera camera) {

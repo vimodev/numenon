@@ -1,4 +1,5 @@
 import engine.Camera;
+import engine.Light;
 import engine.Loader;
 import engine.World;
 import engine.entities.Entity;
@@ -85,6 +86,8 @@ public class Main {
         world.setCamera(camera);
         world.addEntity(entity);
         world.addEntity(entity2);
+        world.addLight(new Light("light_0", new Vector3f(0, 10, 0), new Vector3f(0.01f), new Vector3f(1f), new Vector3f(0)));
+        world.addLight(new Light("light_1", new Vector3f(0, 10, -150), new Vector3f(0.01f), new Vector3f(1f), new Vector3f(0)));
 
         double dt = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {

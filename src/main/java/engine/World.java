@@ -9,10 +9,12 @@ public class World {
 
     protected String name;
     protected List<Entity> entities;
+    protected List<Light> lights;
     protected Camera camera;
 
     public World(String name) {
         entities = new ArrayList<>();
+        lights = new ArrayList<>();
         this.name = name;
     }
 
@@ -22,6 +24,14 @@ public class World {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<Light> getLights() {
+        return lights;
+    }
+
+    public void addLight(Light light) {
+        lights.add(light);
     }
 
     public List<Entity> getEntities() {

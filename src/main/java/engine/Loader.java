@@ -41,11 +41,12 @@ public class Loader {
      * @param indices
      * @return
      */
-    public static Model loadToVAO(float[] positions, float[] textureCoordinates, int[] indices) {
+    public static Model loadToVAO(float[] positions, float[] textureCoordinates, float[] normals, int[] indices) {
         int vaoID = createVAO();
         bindIndicesBuffer(indices);
         storeDataInAttributeList(0, 3, positions);
         storeDataInAttributeList(1, 2, textureCoordinates);
+        storeDataInAttributeList(2, 3, normals);
         unbindVAO();
         return new Model(vaoID, indices.length);
     }
@@ -74,6 +75,7 @@ public class Loader {
         object = ObjUtils.convertToRenderable(object);
         Model model = loadToVAO(ObjData.getVerticesArray(object),
                         ObjData.getTexCoordsArray(object, 2, true),
+                        ObjData.getNormalsArray(object),
                         ObjData.getFaceVertexIndicesArray(object, 3));
         // Handle unspecified texture
         if (textureFile != null && textureFile != "") {

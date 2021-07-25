@@ -1,11 +1,14 @@
+import engine.Camera;
 import engine.Loader;
-import engine.graphics.Model;
+import engine.entities.Entity;
+import engine.entities.TestEntity;
 import engine.graphics.Renderer;
-import engine.graphics.shaders.Shader;
-import engine.graphics.shaders.TestShader;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import utility.Config;
+import utility.Global;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -14,8 +17,8 @@ import static org.lwjgl.opengl.GL11.*;
 public class Main {
 
     private Window window;
-    private final int WINDOW_WIDTH = 1920;
-    private final int WINDOW_HEIGHT = 1080;
+    private final int WINDOW_WIDTH = Config.VIEW_WIDTH;
+    private final int WINDOW_HEIGHT = Config.VIEW_HEIGHT;
     private final String WINDOW_TITLE = "Numenon";
 
     private Timer frameTimer;
@@ -43,6 +46,7 @@ public class Main {
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         // Create the game window
         window = new Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
+        Global.WINDOW_IDENTIFIER = window.getWindow();
         // Center the window
         glfwSetWindowPos(
                 window.getWindow(),
@@ -73,27 +77,18 @@ public class Main {
      */
     public void loop() {
 
-        float[] vertices = {
-                -0.5f, 0.5f, 0f,
-                -0.5f, -0.5f, 0f,
-                0.5f, -0.5f, 0f,
-                0.5f, 0.5f, 0f,
-        };
-        int[] indices = {
-                0, 1, 3,
-                3, 1, 2
-        };
-        Model model = Loader.loadToVAO(vertices, indices);
-        Shader shader = new TestShader();
+        Entity entity = new TestEntity("test", new Vector3f(0, 0, -100),new Vector3f(5), new Vector3f(0));
+        Camera camera = new Camera();
 
         double dt = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
             dt = frameTimer.dt();
 
             Renderer.pre();
-            shader.use();
-            Renderer.render(model);
-            shader.unuse();
+
+            camera.move();
+            entity.rotate(new Vector3f(0, 1f, 0));
+            Renderer.render(entity, camera);
 
             glfwSwapBuffers(window.getWindow()); // swap the color buffers
             // Poll for window events. The key callback above will only be

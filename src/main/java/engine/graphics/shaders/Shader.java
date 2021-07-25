@@ -1,12 +1,16 @@
 package engine.graphics.shaders;
 
 import engine.Loader;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 import utility.Config;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL20.*;
 
@@ -47,6 +51,7 @@ public abstract class Shader {
         // Attach the shaders to the program
         glAttachShader(shaderProgram, vertexShaderID);
         glAttachShader(shaderProgram, fragmentShaderID);
+        bindAttributes();
         glLinkProgram(shaderProgram);
         glValidateProgram(shaderProgram);
         Loader.declareShader(this);
@@ -58,6 +63,41 @@ public abstract class Shader {
 
     public void unuse() {
         GL20.glUseProgram(0);
+    }
+
+    /**
+     * Various uniform setters
+     * to set uniforms in shader of different types
+     */
+    public void setUniform(String uniform, float value) {
+        glUniform1f(getUniformLocation(uniform), value);
+    }
+
+    public void setUniform(String uniform, int value) {
+        glUniform1i(getUniformLocation(uniform), value);
+    }
+
+    public void setUniform(String uniform, Vector3f value) {
+        glUniform3f(getUniformLocation(uniform), value.x, value.y, value.z);
+    }
+
+    public void setUniform(String uniform, boolean value) {
+        glUniform1f(getUniformLocation(uniform), value ? 1 : 0);
+    }
+
+    public void setUniform(String uniform, Matrix4f value) {
+        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+        value.get(matrixBuffer);
+        glUniformMatrix4fv(getUniformLocation(uniform), false, matrixBuffer);
+    }
+
+    /**
+     * Given the name of a uniform get the location in the shader program
+     * @param uniformName of the uniform
+     * @return the location
+     */
+    public int getUniformLocation(String uniformName) {
+        return glGetUniformLocation(shaderProgram, uniformName);
     }
 
     /**

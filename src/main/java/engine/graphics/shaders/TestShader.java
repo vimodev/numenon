@@ -1,7 +1,7 @@
 package engine.graphics.shaders;
 
 /**
- * Basic color gradient shader for testing purposes
+ * Basic color gradient shader for testing purposesTestShader
  */
 public class TestShader extends Shader {
 

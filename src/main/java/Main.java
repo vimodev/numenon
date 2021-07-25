@@ -89,8 +89,7 @@ public class Main {
 
             Renderer.pre();
 
-            world.getCamera().move();
-            world.getEntityByName("test").rotate(new Vector3f(0, 1f, 0));
+            world.tick(dt);
             Renderer.render(world);
 
             glfwSwapBuffers(window.getWindow()); // swap the color buffers

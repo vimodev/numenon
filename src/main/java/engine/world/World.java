@@ -20,6 +20,8 @@ public class World {
         this.name = name;
     }
 
+    public void tick(double dt) {}
+
     public Entity getEntityByName(String name) {
         for (Entity entity : entities) {
             if (entity.getName() == name) {

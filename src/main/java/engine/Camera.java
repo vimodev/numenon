@@ -3,8 +3,12 @@ package engine;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.BufferUtils;
 import utility.Config;
 import utility.Global;
+
+import java.nio.DoubleBuffer;
+import java.util.Vector;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -25,6 +29,11 @@ public class Camera {
     private float yaw = 0;
     private float roll = 0;
 
+    // Movement stuff
+    private boolean mouseLocked = false;
+    double mouseCenterX = Config.VIEW_WIDTH / 2;
+    double mouseCenterY = Config.VIEW_HEIGHT / 2;
+
     /**
      * Create a new camera
      */
@@ -35,10 +44,33 @@ public class Camera {
     }
 
     public void move() {
-        float mv_scl = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_W) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_S);
-        float rt_scl = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_D) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_A);
-        yaw(rt_scl * Config.CAMERA_TURN_SPEED);
-        translate(getDirection().mul(mv_scl * Config.CAMERA_MOVE_SPEED));
+        // Mouse looking
+        if (!mouseLocked && glfwGetMouseButton(Global.WINDOW_IDENTIFIER, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
+            glfwSetCursorPos(Global.WINDOW_IDENTIFIER, mouseCenterX, mouseCenterY);
+            mouseLocked = true;
+        } else if (mouseLocked) {
+            DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
+            DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
+            glfwGetCursorPos(Global.WINDOW_IDENTIFIER, x, y);
+            x.rewind();
+            y.rewind();
+            double newX = x.get();
+            double newY = y.get();
+            double deltaX = newX - Config.VIEW_WIDTH / 2;
+            double deltaY = newY - Config.VIEW_HEIGHT / 2;
+            //System.out.println("Delta X = " + deltaX + " Delta Y = " + deltaY);
+            glfwSetCursorPos(Global.WINDOW_IDENTIFIER, Config.VIEW_WIDTH/2, Config.VIEW_HEIGHT/2);
+            pitch((float) deltaY * Config.CAMERA_MOUSE_SENS);
+            yaw((float) deltaX * Config.CAMERA_MOUSE_SENS);
+            pitch = Math.max(pitch, -90f); pitch = Math.min(pitch, 90f);
+        }
+        if (glfwGetMouseButton(Global.WINDOW_IDENTIFIER, GLFW_MOUSE_BUTTON_1) != GLFW_PRESS) {
+            mouseLocked = false;
+        }
+        // Keyboard movement
+        float mv_scl_forward = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_W) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_S);
+        Vector3f direction = getDirection();
+        translate(direction.mul(mv_scl_forward * Config.CAMERA_MOVE_SPEED));
     }
 
     /**
@@ -66,14 +98,20 @@ public class Camera {
      * @return
      */
     public Vector3f getDirection() {
-        // Get the transformation
-        Vector4f v = new Vector4f(0, 0, -1, 1);
-        Matrix4f M = getTransformation();
-        M.translate(position);
-        // Apply to vector
-        v.mul(M);
-        // Extract direction
-        return (new Vector3f(-v.x, v.y, v.z)).normalize();
+//        // Get the transformation
+//        Vector4f v = new Vector4f(0, 0, -1, 1);
+//        Matrix4f M = getTransformation();
+//        M.translate(position);
+//        // Apply to vector
+//        v.mul(M);
+//        // Extract direction
+//        return (new Vector3f(-v.x, -v.y, v.z)).normalize();
+        // Apply transformations
+        Vector3f dir = new Vector3f(0, 0, -1);
+        dir.rotateX((float) Math.toRadians(-pitch));
+        dir.rotateY((float) Math.toRadians(-yaw));
+        dir.rotateZ((float) Math.toRadians(roll));
+        return dir;
     }
 
     /**

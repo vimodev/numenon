@@ -7,7 +7,9 @@ import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TerrainShader;
 import engine.world.World;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -98,18 +100,41 @@ public class Terrain {
     }
 
     private float sampleModel(float x, float z) {
+        // Find real location
         float rasterX = ((x + this.width / 2) / this.width) * (raster.getWidth() - 1);
         float rasterZ = ((z + this.height / 2) / this.height) * (raster.getHeight() - 1);
+        // Get nearest integral locations
+        int floorX = (int) Math.floor(rasterX); int ceilX = (int) Math.ceil(rasterX);
+        int floorZ = (int) Math.floor(rasterZ); int ceilZ = (int) Math.ceil(rasterZ);
+        // Handle exact points
+        if (floorX == ceilX) {
+            if (ceilX < raster.getWidth() - 1) {
+                ceilX++;
+            } else {
+                floorX--;
+            }
+        }
+        if (floorZ == ceilZ) {
+            if (ceilZ < raster.getHeight() - 1) {
+                ceilZ++;
+            } else {
+                floorZ--;
+            }
+        }
+        // Fetch these locations from the heightmap
         float[] buff = new float[5];
-        this.raster.getPixel((int) Math.floor(rasterX), (int) Math.floor(rasterZ), buff);
-        float p1 = buff[0];
-        this.raster.getPixel((int) Math.floor(rasterX), (int) Math.ceil(rasterZ), buff);
-        float p2 = buff[0];
-        this.raster.getPixel((int) Math.ceil(rasterX), (int) Math.floor(rasterZ), buff);
-        float p3 = buff[0];
-        this.raster.getPixel((int) Math.ceil(rasterX), (int) Math.ceil(rasterZ), buff);
-        float p4 = buff[0];
-        float result = ((((p1 + p2) / 2.0f) + ((p3 + p4) / 2.0f)) / 2.0f) / 255.0f;
+        this.raster.getPixel(floorX, floorZ, buff);
+        float y1 = (buff[0] / 255f) * yScale;
+        this.raster.getPixel(floorX, ceilZ, buff);
+        float y2 = (buff[0] / 255f) * yScale;
+        this.raster.getPixel(ceilX, floorZ, buff);
+        float y3 = (buff[0] / 255f) * yScale;
+        this.raster.getPixel(ceilX, ceilZ, buff);
+        float y4 = (buff[0] / 255f) * yScale;
+        // Bilinear interpolation
+        float y13 = ((ceilX - rasterX) / (ceilX - floorX)) * y1 + ((rasterX - floorX) / (ceilX - floorX)) * y3;
+        float y24 = ((ceilX - rasterX) / (ceilX - floorX)) * y2 + ((rasterX - floorX) / (ceilX - floorX)) * y4;
+        float result = ((ceilZ - rasterZ) / (ceilZ - floorZ)) * y13 + ((rasterZ - floorZ) / (ceilZ - floorZ)) * y24;
         return result;
     }
 
@@ -122,19 +147,55 @@ public class Terrain {
         int vertexPointer = 0;
         for(int i = 0 ;i < resolution; i++){
             for(int j = 0; j < resolution; j++){
+                // Positions
                 float x = (float)j/((float)resolution - 1) * width - width / 2;
                 float z = (float)i/((float)resolution - 1) * height - height / 2;
                 vertices[vertexPointer*3] = x;
-                vertices[vertexPointer*3+1] = sampleModel(x, z) * yScale;
+                vertices[vertexPointer*3+1] = sampleModel(x, z);
                 vertices[vertexPointer*3+2] = z;
-                normals[vertexPointer*3] = 0;
-                normals[vertexPointer*3+1] = 1;
-                normals[vertexPointer*3+2] = 0;
+
+                // Normals
+                float x_prev = (float)Math.max(j - 1, 0)/((float)resolution - 1) * width - width / 2;
+                float x_next = (float)Math.min(j + 1, resolution - 1)/((float)resolution - 1) * width - width / 2;
+                float z_prev = (float)Math.max(i - 1, 0)/((float)resolution - 1) * height - height / 2;
+                float z_next = (float)Math.min(i + 1, resolution - 1)/((float)resolution - 1) * height - height / 2;
+
+                // The points to consider
+                Vector3f current = new Vector3f(x, sampleModel(x,z), z);
+                Vector3f prev_x = new Vector3f(x_prev, sampleModel(x_prev, z), z);
+                Vector3f next_x = new Vector3f(x_next, sampleModel(x_next, z), z);
+                Vector3f prev_z = new Vector3f(x, sampleModel(x, z_prev), z_prev);
+                Vector3f next_z = new Vector3f(x, sampleModel(x, z_next), z_next);
+                // Vectors from current to the other points, grid aligned
+                Vector3f xn = new Vector3f(); Vector3f xp = new Vector3f();
+                Vector3f zn = new Vector3f(); Vector3f zp = new Vector3f();
+                prev_x.sub(current, xp); next_x.sub(current, xn);
+                prev_z.sub(current, zp); next_z.sub(current, zn);
+                // Get average vector for both dimensions
+                Vector3f avg_x = new Vector3f(); Vector3f avg_z = new Vector3f();
+                float angle_x = 0; float angle_z = 0;
+                angle_x = xn.angle(xp); angle_z = zn.angle(zp);
+                xn.rotateZ(angle_x / 2f, avg_x); avg_x.normalize();
+                zn.rotateX(-angle_z / 2f, avg_z); avg_z.normalize();
+                Vector3f normal = new Vector3f();
+                avg_x.add(avg_z, normal); normal.div(2f);
+                System.out.println(normal);
+                normals[vertexPointer*3] = normal.x;
+                normals[vertexPointer*3+1] = normal.y;
+                normals[vertexPointer*3+2] = normal.z;
+
+
+//                normals[vertexPointer*3] = 0;
+//                normals[vertexPointer*3+1] = 1;
+//                normals[vertexPointer*3+2] = 0;
+
+                // Texture coords
                 textureCoords[vertexPointer*2] = (float)j/((float)vertexCount - 1);
                 textureCoords[vertexPointer*2+1] = (float)i/((float)vertexCount - 1);
                 vertexPointer++;
             }
         }
+        // Indices
         int pointer = 0;
         for(int gz=0;gz<resolution-1;gz++){
             for(int gx=0;gx<resolution-1;gx++){

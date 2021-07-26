@@ -28,7 +28,7 @@ public class Terrain {
     private String heightMap;
     private float width;
     private float height;
-    private int resolution = 250;
+    private int resolution = 1000;
     private float yScale;
     private Shader shader;
     private Texture texture;
@@ -179,15 +179,9 @@ public class Terrain {
                 zn.rotateX(-angle_z / 2f, avg_z); avg_z.normalize();
                 Vector3f normal = new Vector3f();
                 avg_x.add(avg_z, normal); normal.div(2f);
-                System.out.println(normal);
                 normals[vertexPointer*3] = normal.x;
                 normals[vertexPointer*3+1] = normal.y;
                 normals[vertexPointer*3+2] = normal.z;
-
-
-//                normals[vertexPointer*3] = 0;
-//                normals[vertexPointer*3+1] = 1;
-//                normals[vertexPointer*3+2] = 0;
 
                 // Texture coords
                 textureCoords[vertexPointer*2] = (float)j/((float)vertexCount - 1);

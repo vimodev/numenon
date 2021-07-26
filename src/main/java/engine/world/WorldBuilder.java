@@ -45,9 +45,9 @@ public class WorldBuilder {
         //world.addEntity(ground);
         world.addLight(new Light("sun", new Vector3f(0, 500, 0), new Vector3f(0f), new Vector3f(1f)));
         Terrain terrain = new Terrain(
-                "heightmap1.png",
+                "australia.jpg",
                 new Texture("grass.png"),
-                1000, 1000, 100,
+                1000, 1000, 10,
                 new Vector3f(0));
         world.setTerrain(terrain);
         return world;

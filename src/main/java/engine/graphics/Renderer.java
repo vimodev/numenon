@@ -29,6 +29,7 @@ public class Renderer {
     }
 
     public static void render(World world) {
+        world.getTerrain().render(world);
         for (Entity entity : world.getEntities()) {
             render(entity, world.getCamera(), world.getLights());
         }

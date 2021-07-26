@@ -1,6 +1,8 @@
 import engine.Camera;
+import engine.Terrain;
 import engine.graphics.Light;
 import engine.Loader;
+import engine.graphics.Texture;
 import engine.world.World;
 import engine.entities.Entity;
 import engine.entities.TestEntity;

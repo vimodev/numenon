@@ -32,12 +32,8 @@ public class WorldBuilder {
                         125,
                         250 * (float) Math.cos(accum / 2)
                 ));
-                getEntityByName("test").setPosition(sun.getPosition());
-                getEntityByName("test").translate(new Vector3f(0, -1, 0));
             }
         };
-        Entity test = new TestEntity("test", new Vector3f(0), new Vector3f(20), new Vector3f(0));
-        world.addEntity(test);
         Camera camera = new Camera();
         camera.setPosition(new Vector3f(0, 600, 880));
         camera.pitch(35);

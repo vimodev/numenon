@@ -19,16 +19,18 @@ import utility.Config;
 import utility.Utility;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.util.List;
 
 public class Terrain {
 
     private Raster raster;
+    private BufferedImage image;
     private String heightMap;
     private float width;
     private float height;
-    private int resolution = 1000;
+    private int resolution = 750;
     private float yScale;
     private Shader shader;
     private Texture texture;
@@ -45,9 +47,11 @@ public class Terrain {
         this.heightMap = heightMap;
         this.position = position;
         try {
-            this.raster = ImageIO.read(
+            BufferedImage i = ImageIO.read(
                     this.getClass().getResource(Config.HEIGHTMAP_LOCATION + heightMap)
-            ).getData();
+            );
+            this.image = i;
+            this.raster = i.getData();
         } catch (Exception e) {
             System.err.println("Could not read height map.");
             e.printStackTrace();
@@ -96,7 +100,10 @@ public class Terrain {
     }
 
     public float sample(float x, float z) {
-        return 0;
+        if (Math.abs(x - position.x) > Math.abs(width / 2) || Math.abs(z - position.z) > Math.abs(height / 2)) {
+            return 0;
+        }
+        return sampleModel(x - position.x, z - position.z) + position.y;
     }
 
     private float sampleModel(float x, float z) {
@@ -122,15 +129,16 @@ public class Terrain {
             }
         }
         // Fetch these locations from the heightmap
-        float[] buff = new float[5];
-        this.raster.getPixel(floorX, floorZ, buff);
-        float y1 = (buff[0] / 255f) * yScale;
-        this.raster.getPixel(floorX, ceilZ, buff);
-        float y2 = (buff[0] / 255f) * yScale;
-        this.raster.getPixel(ceilX, floorZ, buff);
-        float y3 = (buff[0] / 255f) * yScale;
-        this.raster.getPixel(ceilX, ceilZ, buff);
-        float y4 = (buff[0] / 255f) * yScale;
+        //this.raster.getPixel(floorX, floorZ, buff);
+        float value = 0;
+        value = (image.getRGB(floorX, floorZ) >> 16) & 0xff;
+        float y1 = (value / 255f) * yScale;
+        value = (image.getRGB(floorX, ceilZ) >> 16) & 0xff;
+        float y2 = (value / 255f) * yScale;
+        value = (image.getRGB(ceilX, floorZ) >> 16) & 0xff;
+        float y3 = (value / 255f) * yScale;
+        value = (image.getRGB(ceilX, ceilZ) >> 16) & 0xff;
+        float y4 = (value / 255f) * yScale;
         // Bilinear interpolation
         float y13 = ((ceilX - rasterX) / (ceilX - floorX)) * y1 + ((rasterX - floorX) / (ceilX - floorX)) * y3;
         float y24 = ((ceilX - rasterX) / (ceilX - floorX)) * y2 + ((rasterX - floorX) / (ceilX - floorX)) * y4;

@@ -14,7 +14,7 @@ public class Config {
     public static int VIEW_WIDTH = 1920;
     public static int VIEW_HEIGHT = 1080;
 
-    public static float CAMERA_MOVE_SPEED = 4f;
+    public static float CAMERA_MOVE_SPEED = 50f;
     public static float CAMERA_MOUSE_SENS = 0.2f;
 
 }

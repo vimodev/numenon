@@ -47,12 +47,5 @@ void main() {
     }
     // Apply texture
     vec4 tex = texture(textureSampler, mod(pass_position.xz / 25, 1));
-    if (pass_position.y < 0.01) {
-        tex = vec4(0, 0, 1, 0);
-    }else if (pass_position.y > 8) {
-        tex = vec4(1, 1, 1, 0);
-    } else if (pass_position.y > 5) {
-        tex = vec4(0.25, 0.25, 0.25, 0);
-    }
     pixel_colour = pixel_colour * tex;
 }

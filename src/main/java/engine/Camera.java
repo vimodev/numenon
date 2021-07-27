@@ -43,7 +43,13 @@ public class Camera {
         setProjection((float) Config.VIEW_WIDTH / (float) Config.VIEW_HEIGHT, 70, 0.1f, 10000f);
     }
 
-    public void move() {
+    public void terrainBoundMove(Terrain terrain, double dt) {
+        freeMove(dt);
+        float ground = terrain.sample(position.x, position.z);
+        if (position.y < ground + 1.8f) position.y = ground + 1.8f;
+    }
+
+    public void freeMove(double dt) {
         // Mouse looking
         if (!mouseLocked && glfwGetMouseButton(Global.WINDOW_IDENTIFIER, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
             glfwSetCursorPos(Global.WINDOW_IDENTIFIER, mouseCenterX, mouseCenterY);
@@ -70,7 +76,7 @@ public class Camera {
         // Keyboard movement
         float mv_scl_forward = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_W) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_S);
         Vector3f direction = getDirection();
-        translate(direction.mul(mv_scl_forward * Config.CAMERA_MOVE_SPEED));
+        translate(direction.mul(mv_scl_forward * Config.CAMERA_MOVE_SPEED * (float) dt));
     }
 
     /**

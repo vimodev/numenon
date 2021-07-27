@@ -20,10 +20,7 @@ public class WorldBuilder {
 
             @Override
             public void tick(double dt) {
-                this.getCamera().move();
-                if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_SPACE) == 1) {
-                    System.out.println(getCamera().getPosition());
-                }
+                this.getCamera().terrainBoundMove(terrain, dt);
                 accum += dt;
                 if (accum >= 10000) accum -= 10000;
                 Light sun = getLightByName("sun");
@@ -35,15 +32,13 @@ public class WorldBuilder {
             }
         };
         Camera camera = new Camera();
-        camera.setPosition(new Vector3f(0, 600, 880));
-        camera.pitch(35);
         world.setCamera(camera);
         //world.addEntity(ground);
         world.addLight(new Light("sun", new Vector3f(0, 500, 0), new Vector3f(0f), new Vector3f(1f)));
         Terrain terrain = new Terrain(
-                "australia.jpg",
+                "heightmap2.png",
                 new Texture("grass.png"),
-                1000, 1000, 10,
+                1000, 1000, 100,
                 new Vector3f(0));
         world.setTerrain(terrain);
         return world;

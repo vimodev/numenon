@@ -6,7 +6,13 @@ in vec3 pass_normal;
 
 out vec4 pixel_colour;
 
-uniform sampler2D textureSampler;
+// Blendmap texture stuff
+uniform sampler2D backgroundTexture;
+uniform sampler2D rTexture;
+uniform sampler2D gTexture;
+uniform sampler2D bTexture;
+uniform sampler2D blendMap;
+
 // Light stuff
 uniform int numberOfLights;
 uniform vec3 lightPositions[256];
@@ -46,6 +52,15 @@ void main() {
         pixel_colour = pixel_colour + attenuation(i) * lighting(i);
     }
     // Apply texture
-    vec4 tex = texture(textureSampler, mod(pass_position.xz / 25, 1));
-    pixel_colour = pixel_colour * tex;
+    vec4 blendMapColour = texture(blendMap, pass_textureCoords);
+    float backgroundTextureAmount = 1 - (blendMapColour.x + blendMapColour.y + blendMapColour.z);
+    vec2 tiledTextureCoords = mod(pass_position.xz / 25, 1);
+    vec4 backgroundSample = texture(backgroundTexture, tiledTextureCoords) * backgroundTextureAmount;
+    vec4 rSample = texture(rTexture, tiledTextureCoords) * blendMapColour.r;
+    vec4 gSample = texture(gTexture, tiledTextureCoords) * blendMapColour.g;
+    vec4 bSample = texture(bTexture, tiledTextureCoords) * blendMapColour.b;
+
+    vec4 finalTexture = backgroundSample + rSample + gSample + bSample;
+
+    pixel_colour = pixel_colour * finalTexture;
 }

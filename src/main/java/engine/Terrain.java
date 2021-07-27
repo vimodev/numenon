@@ -27,20 +27,29 @@ public class Terrain {
 
     private Raster raster;
     private BufferedImage image;
+
     private String heightMap;
+
     private float width;
     private float height;
     private int resolution = 750;
     private float yScale;
+
     private Shader shader;
-    private Texture texture;
     private Model model;
+
     private Vector3f position;
+
     private Material material = new Material(new Vector3f(1), new Vector3f(1));
 
-    public Terrain(String heightMap, Texture texture, float width, float height, float yScale, Vector3f position) {
+    private Texture blendMap = new Texture("blendMap.png");
+    private Texture backgroundTexture = new Texture("grass.png");
+    private Texture rTexture = new Texture("grassFlowers.png");
+    private Texture bTexture = new Texture("path.png");
+    private Texture gTexture = new Texture("mud.png");
+
+    public Terrain(String heightMap, float width, float height, float yScale, Vector3f position) {
         this.shader = new TerrainShader();
-        this.texture = texture;
         this.width = width;
         this.height = height;
         this.yScale = yScale;
@@ -86,9 +95,22 @@ public class Terrain {
         shader.setUniform("materialDiffuse", material.getDiffuse());
         // Set camera position for easy access
         shader.setUniform("cameraPosition", world.getCamera().getPosition());
-        // Bind texture
+        // Bind textures
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getTextureID());
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, backgroundTexture.getTextureID());
+        shader.setUniform("backgroundTexture", 0);
+        GL13.glActiveTexture(GL13.GL_TEXTURE1);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, rTexture.getTextureID());
+        shader.setUniform("rTexture", 1);
+        GL13.glActiveTexture(GL13.GL_TEXTURE2);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, gTexture.getTextureID());
+        shader.setUniform("gTexture", 2);
+        GL13.glActiveTexture(GL13.GL_TEXTURE3);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, bTexture.getTextureID());
+        shader.setUniform("bTexture", 3);
+        GL13.glActiveTexture(GL13.GL_TEXTURE4);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, blendMap.getTextureID());
+        shader.setUniform("blendMap", 4);
         // Actually render
         GL11.glDrawElements(GL11.GL_TRIANGLES, model.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
         // Unbind everything
@@ -192,8 +214,8 @@ public class Terrain {
                 normals[vertexPointer*3+2] = normal.z;
 
                 // Texture coords
-                textureCoords[vertexPointer*2] = (float)j/((float)vertexCount - 1);
-                textureCoords[vertexPointer*2+1] = (float)i/((float)vertexCount - 1);
+                textureCoords[vertexPointer*2] = (float)j/((float)resolution - 1);
+                textureCoords[vertexPointer*2+1] = (float)i/((float)resolution - 1);
                 vertexPointer++;
             }
         }
@@ -214,7 +236,6 @@ public class Terrain {
             }
         }
         this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
-        this.model.setTexture(texture);
     }
 
 }

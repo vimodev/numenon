@@ -24,12 +24,13 @@ public class Renderer {
         glEnable(GL_LEQUAL);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-        GL11.glClearColor(0.1f, 0.1f, 0.1f, 1);
+        GL11.glClearColor(0f, 0.6f, 1f, 1);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     public static void render(World world) {
         world.getTerrain().render(world);
+        if (world.getPlayer() != null) render(world.getPlayer(), world.getCamera(), world.getLights());
         for (Entity entity : world.getEntities()) {
             render(entity, world.getCamera(), world.getLights());
         }

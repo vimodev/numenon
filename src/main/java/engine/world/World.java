@@ -1,7 +1,7 @@
 package engine.world;
 
 import engine.Camera;
-import engine.Terrain;
+import engine.entities.Player;
 import engine.graphics.Light;
 import engine.entities.Entity;
 
@@ -15,6 +15,7 @@ public class World {
     protected List<Light> lights;
     protected Camera camera;
     protected Terrain terrain;
+    protected Player player;
 
     public World(String name) {
         entities = new ArrayList<>();
@@ -22,10 +23,20 @@ public class World {
         this.name = name;
     }
 
-    public World(String name, Terrain terrain) {
+    public World(String name, Terrain terrain, Player player) {
         entities = new ArrayList<>();
         lights = new ArrayList<>();
         this.name = name;
+        this.player = player;
+        this.terrain = terrain;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 
     public void setTerrain(Terrain terrain) {

@@ -1,14 +1,7 @@
-import engine.Camera;
-import engine.Terrain;
-import engine.graphics.Light;
 import engine.Loader;
-import engine.graphics.Texture;
 import engine.world.World;
-import engine.entities.Entity;
-import engine.entities.TestEntity;
 import engine.graphics.Renderer;
 import engine.world.WorldBuilder;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;

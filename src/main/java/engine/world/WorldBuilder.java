@@ -1,9 +1,8 @@
 package engine.world;
 
 import engine.Camera;
-import engine.Terrain;
+import engine.entities.Player;
 import engine.graphics.Light;
-import engine.graphics.Texture;
 import org.joml.Vector3f;
 
 public class WorldBuilder {
@@ -14,27 +13,38 @@ public class WorldBuilder {
 
             @Override
             public void tick(double dt) {
-                this.getCamera().terrainBoundMove(terrain, dt);
+                //this.getCamera().terrainBoundMove(terrain, dt);
+                getPlayer().update(dt, terrain);
+                camera.follow(getPlayer(), 10, 5, 10f);
                 accum += dt;
                 if (accum >= 10000) accum -= 10000;
-                Light sun = getLightByName("sun");
-                sun.setPosition(new Vector3f(
-                        250 * (float) Math.sin(accum / 2),
-                        125,
-                        250 * (float) Math.cos(accum / 2)
-                ));
+//                Light sun = getLightByName("sun");
+//                sun.setPosition(new Vector3f(
+//                        1500 * (float) Math.sin(accum / 2),
+//                        600,
+//                        1500 * (float) Math.cos(accum / 2)
+//                ));
             }
         };
         Camera camera = new Camera();
         world.setCamera(camera);
-        //world.addEntity(ground);
-        world.addLight(new Light("sun", new Vector3f(0, 500, 0), new Vector3f(0f), new Vector3f(1f)));
+        camera.setPosition(new Vector3f(0, 200, 500));
+        camera.pitch(30);
+        world.addLight(new Light("sun", new Vector3f(-750, 500, 450), new Vector3f(0f), new Vector3f(1f)));
         Terrain terrain =
                 new Terrain(
-                "heightmap2.png",
-                1000, 1000, 100,
-                new Vector3f(0));
+                    "valley.png",
+                    1000, 1000, 100, 150,
+                    new Vector3f(0),
+                    new TexturePack(
+                        "valley_blendMap.png",
+                        "grassy2.png",
+                        "grassFlowers.png",
+                        "mud.png",
+                        "path.png")
+                );
         world.setTerrain(terrain);
+        world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(0.2f), new Vector3f(0)));
         return world;
     }
 

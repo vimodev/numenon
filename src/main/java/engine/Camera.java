@@ -1,14 +1,14 @@
 package engine;
 
+import engine.entities.Player;
+import engine.world.Terrain;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import utility.Config;
 import utility.Global;
 
 import java.nio.DoubleBuffer;
-import java.util.Vector;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -41,6 +41,17 @@ public class Camera {
         position = new Vector3f(0);
         projection = new Matrix4f();
         setProjection((float) Config.VIEW_WIDTH / (float) Config.VIEW_HEIGHT, 70, 0.1f, 10000f);
+    }
+
+    public void follow(Player player, float distance, float height, float angle) {
+        Vector3f dir = player.getDirection();
+        dir.mul(-1);
+        dir.normalize();
+        dir.mul(distance);
+        Vector3f playerPosition = player.getPosition();
+        setPosition(new Vector3f(dir.x + playerPosition.x, player.getPosition().y + height, dir.z + playerPosition.z));
+        pitch = angle;
+        yaw = -player.getRotation().y;
     }
 
     public void terrainBoundMove(Terrain terrain, double dt) {

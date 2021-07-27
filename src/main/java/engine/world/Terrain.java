@@ -24,6 +24,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.util.List;
 
+/**
+ * Terrain for player to walk on in a world
+ */
 public class Terrain {
 
     private Raster raster;
@@ -54,6 +57,7 @@ public class Terrain {
         this.heightMap = heightMap;
         this.position = position;
         this.resolution = resolution;
+        // Read the height map
         try {
             BufferedImage i = ImageIO.read(
                     this.getClass().getResource(Config.HEIGHTMAP_LOCATION + heightMap)
@@ -64,6 +68,7 @@ public class Terrain {
             System.err.println("Could not read height map.");
             e.printStackTrace();
         }
+        // Generate the model from the heightmap
         generateModelFromRaster();
     }
 
@@ -71,6 +76,10 @@ public class Terrain {
         this.texturePack = texturePack;
     }
 
+    /**
+     * Render this terrain with camera and lights from given world
+     * @param world
+     */
     public void render(World world) {
         Model model = this.model;
         Shader shader = this.shader;
@@ -98,7 +107,7 @@ public class Terrain {
         shader.setUniform("materialDiffuse", material.getDiffuse());
         // Set camera position for easy access
         shader.setUniform("cameraPosition", world.getCamera().getPosition());
-        // Bind textures
+        // Bind textures for blend mapping the terrain
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texturePack.getBackgroundTexture().getTextureID());
         shader.setUniform("backgroundTexture", 0);
@@ -124,6 +133,13 @@ public class Terrain {
         shader.unuse();
     }
 
+    /**
+     * Given world coordinates x and z, get the terrain height
+     * defaults to 0 if out of bounds
+     * @param x
+     * @param z
+     * @return
+     */
     public float sample(float x, float z) {
         if (Math.abs(x - position.x) > Math.abs(width / 2) || Math.abs(z - position.z) > Math.abs(height / 2)) {
             return 0;
@@ -131,6 +147,13 @@ public class Terrain {
         return sampleModel(x - position.x, z - position.z) + position.y;
     }
 
+    /**
+     * Sample the model-space y-coordinate given model-space x and z from the heightmap.
+     * Primarily used for constructing the model
+     * @param x
+     * @param z
+     * @return
+     */
     private float sampleModel(float x, float z) {
         // Find real location
         float rasterX = ((x + this.width / 2) / this.width) * (raster.getWidth() - 1);
@@ -171,6 +194,10 @@ public class Terrain {
         return result;
     }
 
+    /**
+     * With the height map loaded,
+     * construct the model by sampling based on parameters
+     */
     private void generateModelFromRaster() {
         int vertexCount = resolution * resolution;
         float vertices[] = new float[vertexCount * 3];

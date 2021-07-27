@@ -19,12 +19,6 @@ public class WorldBuilder {
                 camera.lookAt(getPlayer().getPosition().add(0, 1.5f, 0, new Vector3f()));
                 accum += dt;
                 if (accum >= 10000) accum -= 10000;
-//                Light sun = getLightByName("sun");
-//                sun.setPosition(new Vector3f(
-//                        1500 * (float) Math.sin(accum / 2),
-//                        600,
-//                        1500 * (float) Math.cos(accum / 2)
-//                ));
             }
         };
         Camera camera = new Camera();

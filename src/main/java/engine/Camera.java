@@ -45,6 +45,10 @@ public class Camera {
         setProjection((float) Config.VIEW_WIDTH / (float) Config.VIEW_HEIGHT, 70, 0.1f, 10000f);
     }
 
+    /**
+     * Given a center, make the camera look at the center from its current position
+     * @param center
+     */
     public void lookAt(Vector3f center) {
         Vector3f direction = center.sub(position, new Vector3f());
         direction.normalize();
@@ -53,6 +57,13 @@ public class Camera {
         roll = 0;
     }
 
+    /**
+     * Update the camera's position such that it follows the given player
+     * @param player
+     * @param terrain
+     * @param distance
+     * @param height
+     */
     public void follow(Player player, Terrain terrain, float distance, float height) {
         Vector3f dir = player.getDirection();
         dir.mul(-1);
@@ -66,12 +77,21 @@ public class Camera {
         setPosition(new Vector3f(dir.x + playerPosition.x, finalY, dir.z + playerPosition.z));
     }
 
+    /**
+     * Free move but with terrain collision
+     * @param terrain
+     * @param dt
+     */
     public void terrainBoundMove(Terrain terrain, double dt) {
         freeMove(dt);
         float ground = terrain.sample(position.x, position.z);
         if (position.y < ground + 1.8f) position.y = ground + 1.8f;
     }
 
+    /**
+     * Allow the camera to fly freely
+     * @param dt
+     */
     public void freeMove(double dt) {
         // Mouse looking
         if (!mouseLocked && glfwGetMouseButton(Global.WINDOW_IDENTIFIER, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
@@ -127,14 +147,6 @@ public class Camera {
      * @return
      */
     public Vector3f getDirection() {
-//        // Get the transformation
-//        Vector4f v = new Vector4f(0, 0, -1, 1);
-//        Matrix4f M = getTransformation();
-//        M.translate(position);
-//        // Apply to vector
-//        v.mul(M);
-//        // Extract direction
-//        return (new Vector3f(-v.x, -v.y, v.z)).normalize();
         // Apply transformations
         Vector3f dir = new Vector3f(0, 0, -1);
         dir.rotateX((float) Math.toRadians(-pitch));

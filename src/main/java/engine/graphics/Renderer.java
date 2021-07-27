@@ -19,6 +19,9 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class Renderer {
 
+    /**
+     * Stuff that has to happen at start of every frame
+     */
     public static void pre() {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LEQUAL);
@@ -28,6 +31,10 @@ public class Renderer {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
+    /**
+     * Render the given world, terrain + player + entities
+     * @param world
+     */
     public static void render(World world) {
         world.getTerrain().render(world);
         if (world.getPlayer() != null) render(world.getPlayer(), world.getCamera(), world.getLights());
@@ -36,6 +43,12 @@ public class Renderer {
         }
     }
 
+    /**
+     * Render the given entity with the camera and lights
+     * @param entity
+     * @param camera
+     * @param lights
+     */
     public static void render(Entity entity, Camera camera, List<Light> lights) {
         Model model = entity.getModel();
         Shader shader = entity.getShader();

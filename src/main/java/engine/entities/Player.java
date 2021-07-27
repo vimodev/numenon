@@ -10,8 +10,14 @@ import utility.Global;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+/**
+ * Represents a Player in the game, extra functionality for movement and physics
+ */
 public class Player extends Entity {
 
+    /**
+     * The player's velocity
+     */
     private Vector3f velocity;
 
     public Player(String name, Vector3f position, Vector3f scale, Vector3f rotation) {
@@ -22,6 +28,11 @@ public class Player extends Entity {
         this.velocity = new Vector3f(0);
     }
 
+    /**
+     * Update the player, every frame
+     * @param dt time passed since last frame
+     * @param terrain the terrain to take into account
+     */
     public void update(double dt, Terrain terrain) {
         applyGravity(dt);
         applyJump(dt, terrain);
@@ -31,6 +42,10 @@ public class Player extends Entity {
         checkTerrainCollision(terrain);
     }
 
+    /**
+     * Get the direction the player is facing
+     * @return
+     */
     public Vector3f getDirection() {
         Vector3f dir = new Vector3f(0, 0, -1);
         dir.rotateX((float) Math.toRadians(-rotation.x));
@@ -39,12 +54,20 @@ public class Player extends Entity {
         return dir;
     }
 
+    /**
+     * Apply friction to the players horizontal velocity
+     * @param dt
+     */
     private void applyGeneralFriction(double dt) {
         float factor = 1 - (float) dt * Config.PHYSICS_GENERAL_FRICTION;
         if (factor < 0) factor = 0;
         velocity.x *= factor; velocity.z *= factor;
     }
 
+    /**
+     * Gather input and apply movement accordingly
+     * @param dt
+     */
     private void applyMovement(double dt) {
         Vector3f direction = getDirection();
         float mv_scl_forward = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_W) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_S);
@@ -61,6 +84,11 @@ public class Player extends Entity {
         rotate(new Vector3f(0, turn_scl * Config.PLAYER_TURN_SPEED * (float) dt, 0));
     }
 
+    /**
+     * Get input and check if we have to jump or not
+     * @param dt
+     * @param terrain
+     */
     private void applyJump(double dt, Terrain terrain) {
         float y = terrain.sample(position.x, position.z);
         if (position.y <= y && glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_SPACE) == 1) {
@@ -68,16 +96,30 @@ public class Player extends Entity {
         }
     }
 
+    /**
+     * With the newly calculated velocity for this frame,
+     * apply the velocity to the position based on time passed
+     * @param dt
+     */
     private void applyVelocity(double dt) {
         Vector3f appliedVelocity = new Vector3f();
         velocity.mul((float) dt, appliedVelocity);
         position.add(velocity);
     }
 
+    /**
+     * Apply gravity to the velocity
+     * @param dt
+     */
     private void applyGravity(double dt) {
         velocity.y -= dt * Config.PHYSICS_GRAVITY;
     }
 
+    /**
+     * Check for collision with terrain,
+     * if so, y-velocity set to 0
+     * @param terrain
+     */
     private void checkTerrainCollision(Terrain terrain) {
         float y = terrain.sample(position.x, position.z);
         if (position.y < y) {

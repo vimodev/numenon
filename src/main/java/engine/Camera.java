@@ -4,7 +4,9 @@ import engine.entities.Player;
 import engine.world.Terrain;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.system.CallbackI;
 import utility.Config;
 import utility.Global;
 
@@ -43,15 +45,25 @@ public class Camera {
         setProjection((float) Config.VIEW_WIDTH / (float) Config.VIEW_HEIGHT, 70, 0.1f, 10000f);
     }
 
-    public void follow(Player player, float distance, float height, float angle) {
+    public void lookAt(Vector3f center) {
+        Vector3f direction = center.sub(position, new Vector3f());
+        direction.normalize();
+        pitch = (float) -Math.toDegrees(Math.asin(direction.y));
+        yaw = (float) Math.toDegrees(Math.atan2(direction.x, -direction.z));
+        roll = 0;
+    }
+
+    public void follow(Player player, Terrain terrain, float distance, float height) {
         Vector3f dir = player.getDirection();
         dir.mul(-1);
         dir.normalize();
         dir.mul(distance);
         Vector3f playerPosition = player.getPosition();
-        setPosition(new Vector3f(dir.x + playerPosition.x, player.getPosition().y + height, dir.z + playerPosition.z));
-        pitch = angle;
-        yaw = -player.getRotation().y;
+        float finalY = Math.max(
+                player.getPosition().y + height,
+                terrain.sample(dir.x + playerPosition.x, dir.z + playerPosition.z) + 1f
+        );
+        setPosition(new Vector3f(dir.x + playerPosition.x, finalY, dir.z + playerPosition.z));
     }
 
     public void terrainBoundMove(Terrain terrain, double dt) {

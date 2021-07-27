@@ -15,7 +15,8 @@ public class WorldBuilder {
             public void tick(double dt) {
                 //this.getCamera().terrainBoundMove(terrain, dt);
                 getPlayer().update(dt, terrain);
-                camera.follow(getPlayer(), 10, 5, 10f);
+                camera.follow(getPlayer(), terrain,25, 15);
+                camera.lookAt(getPlayer().getPosition().add(0, 1.5f, 0, new Vector3f()));
                 accum += dt;
                 if (accum >= 10000) accum -= 10000;
 //                Light sun = getLightByName("sun");

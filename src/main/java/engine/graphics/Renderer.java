@@ -36,6 +36,7 @@ public class Renderer {
      * @param world
      */
     public static void render(World world) {
+        Renderer.pre();
         world.getTerrain().render(world);
         if (world.getPlayer() != null) render(world.getPlayer(), world.getCamera(), world.getLights());
         for (Entity entity : world.getEntities()) {

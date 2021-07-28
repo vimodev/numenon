@@ -4,6 +4,7 @@ import engine.Camera;
 import engine.entities.Player;
 import engine.graphics.Light;
 import engine.entities.Entity;
+import engine.graphics.Renderer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,10 @@ public class World {
         this.name = name;
         this.player = player;
         this.terrain = terrain;
+    }
+
+    public void render() {
+        Renderer.render(this);
     }
 
     public Player getPlayer() {

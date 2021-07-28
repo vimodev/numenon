@@ -104,11 +104,9 @@ public class Main {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
 
-            Renderer.pre();
             world.tick(dt);
-            Renderer.render(world);
-            GUIRenderer.render();
-            TextController.render();
+            world.render();
+            GUI.render();
 
             accum += dt;
             if (accum >= 5) {

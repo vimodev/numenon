@@ -9,6 +9,7 @@ import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TerrainShader;
 import engine.world.World;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
@@ -31,6 +32,7 @@ public class Terrain {
 
     private Raster raster;
     private BufferedImage image;
+    private float[][] heights;
 
     private String heightMap;
 
@@ -144,7 +146,23 @@ public class Terrain {
         if (Math.abs(x - position.x) > Math.abs(width / 2) || Math.abs(z - position.z) > Math.abs(height / 2)) {
             return 0;
         }
-        return sampleModel(x - position.x, z - position.z) + position.y;
+        x -= position.x; z -= position.z;
+        x += width / 2; z += height / 2;
+        float squareSizeX = width / (resolution - 1);
+        float squareSizeZ = height / (resolution - 1);
+        int gridX = (int) Math.floor(x / squareSizeX);
+        int gridZ = (int) Math.floor(z / squareSizeZ);
+        float xC = (x % squareSizeX) / squareSizeX;
+        float zC = (z % squareSizeZ) / squareSizeZ;
+        if (xC <= 1 - zC) {
+            return Utility.barryCentric(new Vector3f(0, heights[gridX][gridZ], 0), new Vector3f(1,
+                    heights[gridX + 1][gridZ], 0), new Vector3f(0,
+                    heights[gridX][gridZ + 1], 1), new Vector2f(xC, zC));
+        } else {
+            return Utility.barryCentric(new Vector3f(1, heights[gridX + 1][gridZ], 0), new Vector3f(1,
+                    heights[gridX + 1][gridZ + 1], 1), new Vector3f(0,
+                    heights[gridX][gridZ + 1], 1), new Vector2f(xC, zC));
+        }
     }
 
     /**
@@ -194,11 +212,18 @@ public class Terrain {
         return result;
     }
 
+    private Vector2f modelLocationFromGrid(int gridX, int gridZ) {
+        float x = (float)gridX/((float)resolution - 1) * width - width / 2;
+        float z = (float)gridZ/((float)resolution - 1) * height - height / 2;
+        return new Vector2f(x, z);
+    }
+
     /**
      * With the height map loaded,
      * construct the model by sampling based on parameters
      */
     private void generateModelFromRaster() {
+        heights = new float[resolution][resolution];
         int vertexCount = resolution * resolution;
         float vertices[] = new float[vertexCount * 3];
         float normals[] = new float[vertexCount * 3];
@@ -208,10 +233,12 @@ public class Terrain {
         for(int i = 0 ;i < resolution; i++){
             for(int j = 0; j < resolution; j++){
                 // Positions
-                float x = (float)j/((float)resolution - 1) * width - width / 2;
-                float z = (float)i/((float)resolution - 1) * height - height / 2;
+                Vector2f loc = modelLocationFromGrid(j, i);
+                float x = loc.x; float z = loc.y;
+                float sampleHeight = sampleModel(x, z);
+                heights[j][i] = sampleHeight;
                 vertices[vertexPointer*3] = x;
-                vertices[vertexPointer*3+1] = sampleModel(x, z);
+                vertices[vertexPointer*3+1] = sampleHeight;
                 vertices[vertexPointer*3+2] = z;
 
                 // Normals

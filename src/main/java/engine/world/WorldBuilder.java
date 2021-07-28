@@ -42,7 +42,7 @@ public class WorldBuilder {
         Terrain terrain =
                 new Terrain(
                     "australia.jpg",
-                    10000, 10000, 150, 2000,
+                    1000, 1000, 150, 100,
                     new Vector3f(0),
                     new TexturePack(
                         "valley_blendMap.png",

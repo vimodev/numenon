@@ -78,7 +78,7 @@ public class Main {
 
         World world = WorldBuilder.testWorld1();
 
-        double dt = 0;
+        double dt = 0; double accum = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
             dt = frameTimer.dt();
 
@@ -92,6 +92,12 @@ public class Main {
             Renderer.pre();
             world.tick(dt);
             Renderer.render(world);
+
+            accum += dt;
+            if (accum >= 1) {
+                accum -= 1;
+                System.out.println(frameTimer.fps());
+            }
 
             glfwSwapBuffers(window.getWindow()); // swap the color buffers
             // Poll for window events. The key callback above will only be

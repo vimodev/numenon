@@ -1,8 +1,12 @@
 import engine.Loader;
 import engine.Window;
+import engine.graphics.Texture;
 import engine.gui.GUI;
 import engine.gui.GUIElement;
 import engine.gui.GUIRenderer;
+import engine.gui.fonts.TextController;
+import engine.gui.fonts.fontMeshCreator.FontType;
+import engine.gui.fonts.fontMeshCreator.GUIText;
 import engine.world.World;
 import engine.graphics.Renderer;
 import engine.world.WorldBuilder;
@@ -13,6 +17,8 @@ import org.lwjgl.opengl.GL;
 import utility.Config;
 import utility.Global;
 import utility.Timer;
+
+import java.io.File;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -82,8 +88,10 @@ public class Main {
     public void loop() {
 
         World world = WorldBuilder.testWorld1();
-        GUI gui = new GUI();
-        gui.addElement(new GUIElement("mylogo.png", new Vector2f(-0.85f, -0.85f), new Vector2f(0.15f)));
+        GUI.addElement(new GUIElement("mylogo.png", new Vector2f(-0.85f, -0.85f), new Vector2f(0.15f)));
+
+        FontType font = new FontType(Loader.loadTexture("verdana.png").getTextureID(), Loader.loadFontFile("verdana.fnt"));
+        new GUIText("test","This is a test text", 1, font, new Vector2f(0), 0.5f, true);
 
         double dt = 0; double accum = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
@@ -99,7 +107,8 @@ public class Main {
             Renderer.pre();
             world.tick(dt);
             Renderer.render(world);
-            GUIRenderer.render(gui);
+            GUIRenderer.render();
+            TextController.render();
 
             accum += dt;
             if (accum >= 5) {

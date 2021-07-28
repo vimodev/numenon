@@ -2,6 +2,7 @@ package engine.graphics.shaders;
 
 import engine.Loader;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
@@ -79,6 +80,10 @@ public abstract class Shader {
 
     public void setUniform(String uniform, Vector3f value) {
         glUniform3f(getUniformLocation(uniform), value.x, value.y, value.z);
+    }
+
+    public void setUniform(String uniform, Vector2f value) {
+        glUniform2f(getUniformLocation(uniform), value.x, value.y);
     }
 
     public void setUniform(String uniform, boolean value) {

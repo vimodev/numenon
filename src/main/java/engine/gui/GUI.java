@@ -5,17 +5,13 @@ import java.util.List;
 
 public class GUI {
 
-    private List<GUIElement> elements;
+    private static List<GUIElement> elements = new ArrayList<>();
 
-    public GUI() {
-        elements = new ArrayList<>();
-    }
-
-    public List<GUIElement> getElements() {
+    public static List<GUIElement> getElements() {
         return elements;
     }
 
-    public void addElement(GUIElement element) {
+    public static void addElement(GUIElement element) {
         elements.add(element);
     }
 }

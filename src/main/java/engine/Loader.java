@@ -51,6 +51,14 @@ public class Loader {
         return new Model(vaoID, indices.length);
     }
 
+    public static Model loadToVAO(float[] positions, float[] textureCoordinates) {
+        int vaoID = createVAO();
+        storeDataInAttributeList(0, 2, positions);
+        storeDataInAttributeList(1, 2, textureCoordinates);
+        unbindVAO();
+        return new Model(vaoID, positions.length);
+    }
+
     public static Model loadToVAO(float[] positions) {
         int vaoID = createVAO();
         storeDataInAttributeList(0, 2, positions);
@@ -95,6 +103,10 @@ public class Loader {
             loadedModels.get(objFile).put(textureFile, model);
         }
         return model;
+    }
+
+    public static File loadFontFile(String filename) {
+        return new File(Loader.class.getResource(Config.FONT_LOCATION + filename).getFile());
     }
 
     /**

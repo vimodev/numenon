@@ -9,6 +9,7 @@ public class Config {
     public static String TEXTURE_LOCATION = "/textures/";
     public static String MODEL_LOCATION = "/models/";
     public static String HEIGHTMAP_LOCATION = "/heightmaps/";
+    public static String FONT_LOCATION = "/fonts/";
     public static String DEFAULT_TEXTURE = "default.png";
 
     public static int VIEW_WIDTH = 1920;

@@ -17,12 +17,12 @@ public class Config {
     public static float CAMERA_MOVE_SPEED = 100f;
     public static float CAMERA_MOUSE_SENS = 0.2f;
 
-    public static float PLAYER_MOVE_SPEED = 15f;
-    public static float PLAYER_ACCELERATION = 5f;
+    public static final float PLAYER_MOVE_SPEED = 5f;
     public static float PLAYER_TURN_SPEED = 270f;
-    public static float PLAYER_JUMP_SPEED = 1.25f;
+    public static float PLAYER_JUMP_SPEED = 5f;
+    public static float PLAYER_FRICTION_SMOOTHNESS = 4f;
+    public static float PLAYER_FRICTION_AMOUNT = 0.95f;
 
-    public static float PHYSICS_GRAVITY = 5f;
-    public static float PHYSICS_GENERAL_FRICTION = 5f;
+    public static float PHYSICS_GRAVITY = 9.81f;
 
 }

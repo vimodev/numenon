@@ -35,10 +35,10 @@ public class Player extends Entity {
      */
     public void update(double dt, Terrain terrain) {
         applyGravity(dt);
-        applyJump(dt, terrain);
+        applyJump(terrain);
         applyMovement(dt);
         applyVelocity(dt);
-        applyGeneralFriction(dt);
+        applyMovementFriction(dt, terrain);
         checkTerrainCollision(terrain);
     }
 
@@ -58,10 +58,14 @@ public class Player extends Entity {
      * Apply friction to the players horizontal velocity
      * @param dt
      */
-    private void applyGeneralFriction(double dt) {
-        float factor = 1 - (float) dt * Config.PHYSICS_GENERAL_FRICTION;
-        if (factor < 0) factor = 0;
-        velocity.x *= factor; velocity.z *= factor;
+    private void applyMovementFriction(double dt, Terrain terrain) {
+        float y = terrain.sample(position.x, position.z);
+        if (position.y > y) return;
+        float ratio = (float) Math.sqrt((velocity.x * velocity.x) + (velocity.z * velocity.z)) / Config.PLAYER_MOVE_SPEED;
+        float friction = (float) Math.pow(ratio, 1f / Config.PLAYER_FRICTION_SMOOTHNESS) - Config.PLAYER_FRICTION_AMOUNT;
+        if (friction < 0) friction = 0;
+        friction = (float) Math.pow(friction, dt);
+        velocity.x *= friction; velocity.z *= friction;
     }
 
     /**
@@ -71,25 +75,20 @@ public class Player extends Entity {
     private void applyMovement(double dt) {
         Vector3f direction = getDirection();
         float mv_scl_forward = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_W) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_S);
-        Vector3f velUpdate = direction.mul(mv_scl_forward * Config.PLAYER_ACCELERATION * (float) dt);
-        velUpdate.y = 0;
-        velocity.add(velUpdate);
-        float newHorizontalVelocity = (float) Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
-        if (newHorizontalVelocity > Config.PLAYER_MOVE_SPEED) {
-            float normalize = Config.PLAYER_MOVE_SPEED / newHorizontalVelocity;
-            velocity.x *= normalize; velocity.y *= normalize;
+        if (mv_scl_forward != 0) {
+            direction.mul(Config.PLAYER_MOVE_SPEED * mv_scl_forward);
+            direction.y = velocity.y;
+            velocity.set(direction);
         }
-        //translate(direction.mul(mv_scl_forward * Config.PLAYER_MOVE_SPEED * (float) dt));
         float turn_scl = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_A) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_D);
         rotate(new Vector3f(0, turn_scl * Config.PLAYER_TURN_SPEED * (float) dt, 0));
     }
 
     /**
      * Get input and check if we have to jump or not
-     * @param dt
      * @param terrain
      */
-    private void applyJump(double dt, Terrain terrain) {
+    private void applyJump(Terrain terrain) {
         float y = terrain.sample(position.x, position.z);
         if (position.y <= y && glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_SPACE) == 1) {
             velocity.y += Config.PLAYER_JUMP_SPEED;
@@ -104,7 +103,7 @@ public class Player extends Entity {
     private void applyVelocity(double dt) {
         Vector3f appliedVelocity = new Vector3f();
         velocity.mul((float) dt, appliedVelocity);
-        position.add(velocity);
+        position.add(appliedVelocity);
     }
 
     /**

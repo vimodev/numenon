@@ -1,4 +1,5 @@
 import engine.Loader;
+import engine.Window;
 import engine.gui.GUI;
 import engine.gui.GUIElement;
 import engine.gui.GUIRenderer;
@@ -101,8 +102,8 @@ public class Main {
             GUIRenderer.render(gui);
 
             accum += dt;
-            if (accum >= 1) {
-                accum -= 1;
+            if (accum >= 5) {
+                accum -= 5;
                 System.out.println(frameTimer.fps());
             }
 

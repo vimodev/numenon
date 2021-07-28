@@ -27,8 +27,8 @@ public class WorldBuilder {
                     this.getCamera().terrainBoundMove(terrain, dt);
                 } else {
                     getPlayer().update(dt, terrain);
-                    camera.follow(getPlayer(), terrain,25, 15);
-                    camera.lookAt(getPlayer().getPosition().add(0, 5.5f, 0, new Vector3f()));
+                    camera.follow(getPlayer(), terrain,2, 1.75f);
+                    camera.lookAt(getPlayer().getPosition().add(0, 1f, 0, new Vector3f()));
                 }
                 accum += dt;
                 if (accum >= 10000) accum -= 10000;
@@ -42,7 +42,7 @@ public class WorldBuilder {
         Terrain terrain =
                 new Terrain(
                     "australia.jpg",
-                    1000, 1000, 150, 100,
+                    100, 100, 15, 100,
                     new Vector3f(0),
                     new TexturePack(
                         "valley_blendMap.png",
@@ -52,7 +52,7 @@ public class WorldBuilder {
                         "path.png")
                 );
         world.setTerrain(terrain);
-        world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(0.2f), new Vector3f(0)));
+        world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 24f), new Vector3f(0)));
         return world;
     }
 

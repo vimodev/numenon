@@ -4,19 +4,32 @@ import engine.Camera;
 import engine.entities.Player;
 import engine.graphics.Light;
 import org.joml.Vector3f;
+import utility.Global;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class WorldBuilder {
 
     public static World testWorld1() {
         World world = new World("test") {
             double accum = 0;
+            boolean freeCam = false;
+
 
             @Override
             public void tick(double dt) {
-                //this.getCamera().terrainBoundMove(terrain, dt);
-                getPlayer().update(dt, terrain);
-                camera.follow(getPlayer(), terrain,25, 15);
-                camera.lookAt(getPlayer().getPosition().add(0, 1.5f, 0, new Vector3f()));
+                if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_F9) == 1) {
+                    freeCam = true;
+                } else if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_F8) == 1) {
+                    freeCam = false;
+                }
+                if (freeCam) {
+                    this.getCamera().terrainBoundMove(terrain, dt);
+                } else {
+                    getPlayer().update(dt, terrain);
+                    camera.follow(getPlayer(), terrain,25, 15);
+                    camera.lookAt(getPlayer().getPosition().add(0, 5.5f, 0, new Vector3f()));
+                }
                 accum += dt;
                 if (accum >= 10000) accum -= 10000;
             }
@@ -28,12 +41,12 @@ public class WorldBuilder {
         world.addLight(new Light("sun", new Vector3f(-750, 500, 450), new Vector3f(0f), new Vector3f(1f)));
         Terrain terrain =
                 new Terrain(
-                    "valley.png",
-                    1000, 1000, 100, 150,
+                    "australia.jpg",
+                    10000, 10000, 150, 2000,
                     new Vector3f(0),
                     new TexturePack(
                         "valley_blendMap.png",
-                        "grassy2.png",
+                        "grass.png",
                         "grassFlowers.png",
                         "mud.png",
                         "path.png")

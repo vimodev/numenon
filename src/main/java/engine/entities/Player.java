@@ -22,7 +22,7 @@ public class Player extends Entity {
 
     public Player(String name, Vector3f position, Vector3f scale, Vector3f rotation) {
         super(name, position, scale, rotation);
-        this.model = Loader.loadModel("warrior.obj", "");
+        this.model = Loader.loadModel("warrior_cleaned.obj", "stone.png");
         this.shader = new TextureShader();
         this.material = new Material(new Vector3f(1), new Vector3f(1));
         this.velocity = new Vector3f(0);

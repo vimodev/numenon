@@ -82,8 +82,14 @@ public class Main {
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
             dt = frameTimer.dt();
 
-            Renderer.pre();
+            if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_F10) == 1) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_F11) == 1) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
 
+            Renderer.pre();
             world.tick(dt);
             Renderer.render(world);
 

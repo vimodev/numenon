@@ -4,6 +4,7 @@ package engine.gui.fonts.fontMeshCreator;
 import engine.gui.fonts.TextController;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL30;
 
 /**
  * Represents a piece of text in the game.

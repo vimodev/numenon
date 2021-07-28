@@ -91,7 +91,7 @@ public class Main {
         GUI.addElement(new GUIElement("mylogo.png", new Vector2f(-0.85f, -0.85f), new Vector2f(0.15f)));
 
         FontType font = new FontType(Loader.loadTexture("verdana.png").getTextureID(), Loader.loadFontFile("verdana.fnt"));
-        new GUIText("test","This is a test text", 1, font, new Vector2f(0), 0.5f, true);
+        GUIText text = new GUIText("fps","0", 1, font, new Vector2f(0), 1f, false);
 
         double dt = 0; double accum = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
@@ -109,9 +109,10 @@ public class Main {
             GUI.render();
 
             accum += dt;
-            if (accum >= 5) {
-                accum -= 5;
-                System.out.println(frameTimer.fps());
+            if (accum >= 1) {
+                accum -= 1;
+                text.remove();
+                text = new GUIText("fps", String.format("%.2f", frameTimer.fps()), 1, font, new Vector2f(0), 1f, false);
             }
 
             glfwSwapBuffers(window.getWindow()); // swap the color buffers

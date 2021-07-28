@@ -39,6 +39,14 @@ public class Utility {
         return M;
     }
 
+    public static Matrix4f createTransformationMatrix(Vector2f translation, Vector2f scale) {
+        Matrix4f M = new Matrix4f();
+        M.identity();
+        M.translate(new Vector3f(translation, 0));
+        M.scale(new Vector3f(scale, 1));
+        return M;
+    }
+
     public static FloatBuffer floatArrayToBuffer(float[] data) {
         FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
         buffer.put(data);

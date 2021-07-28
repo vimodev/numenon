@@ -1,7 +1,11 @@
 import engine.Loader;
+import engine.gui.GUI;
+import engine.gui.GUIElement;
+import engine.gui.GUIRenderer;
 import engine.world.World;
 import engine.graphics.Renderer;
 import engine.world.WorldBuilder;
+import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -77,6 +81,8 @@ public class Main {
     public void loop() {
 
         World world = WorldBuilder.testWorld1();
+        GUI gui = new GUI();
+        gui.addElement(new GUIElement("mylogo.png", new Vector2f(-0.85f, -0.85f), new Vector2f(0.15f)));
 
         double dt = 0; double accum = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
@@ -92,6 +98,7 @@ public class Main {
             Renderer.pre();
             world.tick(dt);
             Renderer.render(world);
+            GUIRenderer.render(gui);
 
             accum += dt;
             if (accum >= 1) {

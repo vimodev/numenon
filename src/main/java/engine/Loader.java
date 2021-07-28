@@ -51,6 +51,13 @@ public class Loader {
         return new Model(vaoID, indices.length);
     }
 
+    public static Model loadToVAO(float[] positions) {
+        int vaoID = createVAO();
+        storeDataInAttributeList(0, 2, positions);
+        unbindVAO();
+        return new Model(vaoID, positions.length / 2);
+    }
+
     public static Model loadModel(String objFile, String textureFile) {
         // If model with that model and texture exists already, return it.
         if (loadedModels.containsKey(objFile) && loadedModels.get(objFile).containsKey(textureFile)) {

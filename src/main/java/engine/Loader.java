@@ -96,15 +96,15 @@ public class Loader {
                         ObjData.getNormalsArray(object),
                         ObjData.getFaceVertexIndicesArray(object, 3));
         // Handle unspecified texture
-        if (textureFile != null && textureFile != "") {
-            model.setTexture(loadTexture(textureFile));
+        if (textureFile == null || textureFile == "") {
             textureFile = Config.DEFAULT_TEXTURE;
         }
+        model.setTexture(loadTexture(textureFile));
         // Track load
         if (!loadedModels.containsKey(objFile)) {
             loadedModels.put(objFile, new HashMap<>());
-            loadedModels.get(objFile).put(textureFile, model);
         }
+        loadedModels.get(objFile).put(textureFile, model);
         return model;
     }
 

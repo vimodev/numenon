@@ -62,9 +62,7 @@ public class Terrain {
         if (heightMap == "" || heightMap == null) {
             randomlyGenerated = true;
             generator = new HeightsGenerator();
-            Timer profiler = new Timer();
             generateModelFromRandom();
-            System.out.println(profiler.readDt());
             return;
         }
         // Read the height map

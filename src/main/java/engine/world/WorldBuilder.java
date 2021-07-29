@@ -7,6 +7,7 @@ import engine.entities.Player;
 import engine.graphics.Light;
 import org.joml.Vector3f;
 import utility.Global;
+import utility.Timer;
 
 import static org.lwjgl.glfw.GLFW.*;
 

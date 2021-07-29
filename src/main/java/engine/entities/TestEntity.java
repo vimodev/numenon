@@ -14,4 +14,9 @@ public class TestEntity extends Entity {
         this.material = new Material(new Vector3f(1), new Vector3f(1));
     }
 
+    @Override
+    public boolean isColliding(Vector3f checkedPosition) {
+        return false;
+    }
+
 }

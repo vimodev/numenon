@@ -34,6 +34,12 @@ public class Timer {
         return dt;
     }
 
+    public double readDt() {
+        double currentTime = ((double) System.nanoTime()) / (double) 1000000000L;
+        double dt = currentTime - previousTime;
+        return dt;
+    }
+
     /**
      * Returns exponential average of calls of dt() per second
      * new_fps = (1 - a) * old_fps + (a  / dt)

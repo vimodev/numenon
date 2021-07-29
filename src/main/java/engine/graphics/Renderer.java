@@ -5,10 +5,12 @@ import engine.world.World;
 import engine.entities.Entity;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import utility.Config;
 
 import java.util.List;
 
@@ -38,9 +40,12 @@ public class Renderer {
      */
     public static void render(World world) {
         Renderer.pre();
+        world.updateLists();
         world.getTerrain().render(world);
-        if (world.getPlayer() != null) render(world.getPlayer(), world.getCamera(), world.getLights());
-        for (Entity entity : world.getEntities()) {
+        if (world.getPlayer() != null) {
+            render(world.getPlayer(), world.getCamera(), world.getLights());
+        }
+        for (Entity entity : world.getRenderedEntities()) {
             render(entity, world.getCamera(), world.getLights());
         }
     }

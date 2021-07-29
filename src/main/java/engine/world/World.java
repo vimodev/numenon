@@ -5,6 +5,7 @@ import engine.entities.Player;
 import engine.graphics.Light;
 import engine.entities.Entity;
 import engine.graphics.Renderer;
+import utility.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,18 +19,49 @@ public class World {
     protected Terrain terrain;
     protected Player player;
 
+    protected List<Entity> renderedEntities;
+    protected List<Entity> collisionCheckedEntities;
+
     public World(String name) {
         entities = new ArrayList<>();
         lights = new ArrayList<>();
+        renderedEntities = new ArrayList<>();
+        collisionCheckedEntities = new ArrayList<>();
         this.name = name;
     }
 
     public World(String name, Terrain terrain, Player player) {
         entities = new ArrayList<>();
         lights = new ArrayList<>();
+        renderedEntities = new ArrayList<>();
+        collisionCheckedEntities = new ArrayList<>();
         this.name = name;
         this.player = player;
         this.terrain = terrain;
+    }
+
+    public void updateLists() {
+        // Update rendered entities based on view distance
+        renderedEntities.clear();
+        collisionCheckedEntities.clear();
+        for (Entity entity : entities) {
+            float distance = entity.getPosition().distance(camera.getPosition());
+            if (distance <= Config.ENTITY_VIEW_DISTANCE) {
+                renderedEntities.add(entity);
+                // Render distance always >>>> collision distance so check that only when rendered
+                if (distance <= Config.ENTITY_COLLISION_CHECK_RADIUS) {
+                    collisionCheckedEntities.add(entity);
+                }
+            }
+        }
+    }
+
+    public List<Entity> getRenderedEntities() {
+        return renderedEntities;
+    }
+
+    public List<Entity> getCollisionCheckedEntities() {
+        return collisionCheckedEntities;
     }
 
     public void render() {

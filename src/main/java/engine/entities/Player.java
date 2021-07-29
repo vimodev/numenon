@@ -4,9 +4,13 @@ import engine.Loader;
 import engine.graphics.Material;
 import engine.graphics.shaders.TextureShader;
 import engine.world.Terrain;
+import engine.world.World;
 import org.joml.Vector3f;
 import utility.Config;
 import utility.Global;
+import utility.Timer;
+
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -19,6 +23,8 @@ public class Player extends Entity {
      * The player's velocity
      */
     private Vector3f velocity;
+    private Vector3f previousPosition;
+    private Timer collisionTimer;
 
     public Player(String name, Vector3f position, Vector3f scale, Vector3f rotation) {
         super(name, position, scale, rotation);
@@ -26,20 +32,46 @@ public class Player extends Entity {
         this.shader = new TextureShader();
         this.material = new Material(new Vector3f(1), new Vector3f(1));
         this.velocity = new Vector3f(0);
+        this.previousPosition = position;
+        this.collisionTimer = new Timer();
     }
 
     /**
      * Update the player, every frame
      * @param dt time passed since last frame
-     * @param terrain the terrain to take into account
+     * @param world the world to take into account
      */
-    public void update(double dt, Terrain terrain) {
+    public void update(double dt, World world) {
+        Terrain terrain = world.getTerrain();
         applyGravity(dt);
         applyJump(terrain);
         applyMovement(dt);
         applyVelocity(dt);
         applyMovementFriction(dt, terrain);
         checkTerrainCollision(terrain);
+        if(!checkEntityCollision(world.getCollisionCheckedEntities())) {
+            previousPosition = new Vector3f(position.x, position.y, position.z);
+        }
+    }
+
+    private boolean checkEntityCollision(List<Entity> candidates) {
+        for (Entity entity : candidates) {
+            if (entity.isColliding(position)) {
+                position = new Vector3f(previousPosition.x, previousPosition.y, previousPosition.z);
+                Vector3f dir = position.sub(entity.getPosition(), new Vector3f());
+                dir.normalize();
+                dir.mul(Config.ENTITY_COLLISION_BOUNCEBACK);
+                velocity = dir;
+                collisionTimer.dt();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isColliding(Vector3f checkedPosition) {
+        return false;
     }
 
     /**
@@ -73,9 +105,10 @@ public class Player extends Entity {
      * @param dt
      */
     private void applyMovement(double dt) {
+        boolean cooldown = (collisionTimer.readDt() <= Config.ENTITY_COLLISION_TIMEOUT);
         Vector3f direction = getDirection();
         float mv_scl_forward = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_W) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_S);
-        if (mv_scl_forward != 0) {
+        if (mv_scl_forward != 0 && !cooldown) {
             direction.mul(Config.PLAYER_MOVE_SPEED * mv_scl_forward);
             direction.y = velocity.y;
             velocity.set(direction);

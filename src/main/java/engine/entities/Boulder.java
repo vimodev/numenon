@@ -14,4 +14,12 @@ public class Boulder extends Entity {
         this.material = new Material(new Vector3f(1), new Vector3f(1));
     }
 
+    @Override
+    public boolean isColliding(Vector3f checkedPosition) {
+        float distance = position.distance(checkedPosition);
+        float horizontalScale = Math.max(scale.x, scale.z);
+        return (distance < horizontalScale * 10f);
+    }
+
+
 }

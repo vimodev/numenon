@@ -28,7 +28,7 @@ public class WorldBuilder {
                 if (freeCam) {
                     this.getCamera().terrainBoundMove(terrain, dt);
                 } else {
-                    getPlayer().update(dt, terrain);
+                    getPlayer().update(dt, this);
                     camera.follow(getPlayer(), terrain,2.5f, 1.75f);
                     camera.lookAt(getPlayer().getPosition().add(0, 1.35f, 0, new Vector3f()));
                 }
@@ -44,7 +44,7 @@ public class WorldBuilder {
         Terrain terrain =
                 new Terrain(
                     "",
-                    150, 150, 25, 128,
+                    500, 500, 25, 430,
                     new Vector3f(0),
                     new TexturePack(
                         "grass_blendmap.png",
@@ -55,7 +55,7 @@ public class WorldBuilder {
                 );
         world.setTerrain(terrain);
         world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 24f), new Vector3f(0)));
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             float x = ((float) Math.random() - 0.5f) * world.getTerrain().getWidth();
             float z = ((float) Math.random() - 0.5f) * world.getTerrain().getHeight();
             world.addEntity(

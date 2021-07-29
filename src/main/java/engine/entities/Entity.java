@@ -25,6 +25,8 @@ public abstract class Entity {
         this.rotation = rotation;
     }
 
+    public abstract boolean isColliding(Vector3f checkedPosition);
+
     /**
      * Gets the transformation matrix of this entity
      * @return transformation matrix

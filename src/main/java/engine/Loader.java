@@ -7,6 +7,7 @@ import de.javagl.obj.ObjUtils;
 import engine.graphics.models.Model;
 import engine.graphics.Texture;
 import engine.graphics.shaders.Shader;
+import engine.world.Terrain;
 import engine.world.TerrainQueueItem;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -30,6 +31,7 @@ import java.util.Map;
 public class Loader {
 
     private static List<TerrainQueueItem> terrainQueue = new ArrayList<>();
+    private static List<Terrain> terrainDestroyQueue = new ArrayList<>();
 
     private static List<Integer> vaos = new ArrayList<Integer>();
     private static List<Integer> vbos = new ArrayList<Integer>();
@@ -42,6 +44,14 @@ public class Loader {
     public static void addToTerrainQueue(TerrainQueueItem item) {
         terrainQueue.add(item);
     }
+    public static void addToTerrainDestroyQueue(Terrain terrain) {
+        terrainDestroyQueue.add(terrain);
+    }
+    public static void addToTerrainDestroyQueue(Terrain[] terrains) {
+        for (Terrain terrain : terrains) {
+            terrainDestroyQueue.add(terrain);
+        }
+    }
 
     public static void handleTerrainQueue() {
         Global.terrain_queue_mutex.lock();
@@ -50,6 +60,10 @@ public class Loader {
             item.target.readyToRender = true;
         }
         terrainQueue.clear();
+        for (Terrain terrain : terrainDestroyQueue) {
+            Terrain.destroy(terrain);
+        }
+        terrainDestroyQueue.clear();
         Global.terrain_queue_mutex.unlock();
     }
 

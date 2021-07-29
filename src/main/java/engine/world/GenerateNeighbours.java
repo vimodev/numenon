@@ -1,6 +1,7 @@
 package engine.world;
 
 import engine.Camera;
+import engine.Loader;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL;
@@ -95,20 +96,24 @@ public class GenerateNeighbours implements Runnable {
                  */
                 // Move stuff to the left
                 if (x_offset == 1) {
+                    Loader.addToTerrainDestroyQueue(new Terrain[]{arr[0], arr[3], arr[5]});
                     arr[0] = arr[1]; arr[1] = arr[2]; arr[2] = null;
                     arr[3] = center; center = arr[4]; arr[4] = null;
                     arr[5] = arr[6]; arr[6] = arr[7]; arr[7] = null;
                 } else if (x_offset == -1) { // Move stuff right
+                    Loader.addToTerrainDestroyQueue(new Terrain[]{arr[2], arr[4], arr[7]});
                     arr[2] = arr[1]; arr[1] = arr[0]; arr[0] = null;
                     arr[4] = center; center = arr[3]; arr[3] = null;
                     arr[7] = arr[6]; arr[6] = arr[5]; arr[5] = null;
                 }
                 // Move stuff down
                 if (z_offset == 1) {
+                    Loader.addToTerrainDestroyQueue(new Terrain[]{arr[5], arr[6], arr[7]});
                     arr[5] = arr[3]; arr[3] = arr[0]; arr[0] = null;
                     arr[6] = center; center = arr[1]; arr[1] = null;
                     arr[7] = arr[4]; arr[4] = arr[2]; arr[2] = null;
                 } else if (z_offset == -1) { // Move stuff up
+                    Loader.addToTerrainDestroyQueue(new Terrain[]{arr[0], arr[1], arr[2]});
                     arr[0] = arr[3]; arr[3] = arr[5]; arr[5] = null;
                     arr[1] = center; center = arr[6]; arr[6] = null;
                     arr[2] = arr[4]; arr[4] = arr[7]; arr[7] = null;

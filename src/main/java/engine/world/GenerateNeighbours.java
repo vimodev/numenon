@@ -66,11 +66,6 @@ public class GenerateNeighbours implements Runnable {
                     original.getTexturePack(), offset.x, offset.y);
         }
         while (true) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             Camera camera = world.getCamera();
             Vector3f cpos = camera.getPosition();
             Terrain center = world.getTerrain();

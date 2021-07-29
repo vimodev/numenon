@@ -9,7 +9,7 @@ uniform vec2 translation;
 
 void main(){
 
-    gl_Position = vec4(position, 0, 1);
+    gl_Position = vec4(position + translation * vec2(2.0, -2.0), 0, 1);
     pass_textureCoords = textureCoords;
 
 }

@@ -60,7 +60,7 @@ public class Player extends Entity {
      */
     private void applyMovementFriction(double dt, Terrain terrain) {
         float y = terrain.sample(position.x, position.z);
-        if (position.y > y) return;
+        if (position.y > y + 0.1f) return;
         float ratio = (float) Math.sqrt((velocity.x * velocity.x) + (velocity.z * velocity.z)) / Config.PLAYER_MOVE_SPEED;
         float friction = (float) Math.pow(ratio, 1f / Config.PLAYER_FRICTION_SMOOTHNESS) - Config.PLAYER_FRICTION_AMOUNT;
         if (friction < 0) friction = 0;

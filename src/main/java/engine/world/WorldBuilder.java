@@ -1,6 +1,8 @@
 package engine.world;
 
 import engine.Camera;
+import engine.entities.Boulder;
+import engine.entities.Pine;
 import engine.entities.Player;
 import engine.graphics.Light;
 import org.joml.Vector3f;
@@ -27,8 +29,8 @@ public class WorldBuilder {
                     this.getCamera().terrainBoundMove(terrain, dt);
                 } else {
                     getPlayer().update(dt, terrain);
-                    camera.follow(getPlayer(), terrain,2, 1.75f);
-                    camera.lookAt(getPlayer().getPosition().add(0, 1f, 0, new Vector3f()));
+                    camera.follow(getPlayer(), terrain,2.5f, 1.75f);
+                    camera.lookAt(getPlayer().getPosition().add(0, 1.35f, 0, new Vector3f()));
                 }
                 accum += dt;
                 if (accum >= 10000) accum -= 10000;
@@ -38,14 +40,14 @@ public class WorldBuilder {
         world.setCamera(camera);
         camera.setPosition(new Vector3f(0, 200, 500));
         camera.pitch(30);
-        world.addLight(new Light("sun", new Vector3f(-750, 500, 450), new Vector3f(0f), new Vector3f(1f)));
+        world.addLight(new Light("sun", new Vector3f(-500f, 500, 0), new Vector3f(0f), new Vector3f(1f)));
         Terrain terrain =
                 new Terrain(
-                    "australia.jpg",
-                    3000, 3000, 25, 500,
+                    "",
+                    150, 150, 25, 128,
                     new Vector3f(0),
                     new TexturePack(
-                        "valley_blendMap.png",
+                        "grass_blendmap.png",
                         "grass.png",
                         "grassFlowers.png",
                         "mud.png",
@@ -53,6 +55,36 @@ public class WorldBuilder {
                 );
         world.setTerrain(terrain);
         world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 24f), new Vector3f(0)));
+        for (int i = 0; i < 100; i++) {
+            float x = ((float) Math.random() - 0.5f) * world.getTerrain().getWidth();
+            float z = ((float) Math.random() - 0.5f) * world.getTerrain().getHeight();
+            world.addEntity(
+                    new Pine(
+                            "pine" + i,
+                            new Vector3f(
+                                    x,
+                                    world.getTerrain().sample(x, z) - 0.3f,
+                                    z
+                            ),
+                            new Vector3f(0.2f + (float) Math.random() * 0.2f),
+                            new Vector3f(0, (float) Math.random() * 360f, 0)
+                    )
+            );
+            x = ((float) Math.random() - 0.5f) * world.getTerrain().getWidth();
+            z = ((float) Math.random() - 0.5f) * world.getTerrain().getHeight();
+            world.addEntity(
+                    new Boulder(
+                            "boulder" + i,
+                            new Vector3f(
+                                    x,
+                                    world.getTerrain().sample(x, z),
+                                    z
+                            ),
+                            new Vector3f(0.3f * (float) Math.random() + 0.05f),
+                            new Vector3f((float) Math.random() * 360f, (float) Math.random() * 360f, (float) Math.random() * 360f)
+                    )
+            );
+        }
         return world;
     }
 

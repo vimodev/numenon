@@ -26,6 +26,7 @@ public class Renderer {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LEQUAL);
         glEnable(GL_CULL_FACE);
+        GL11.glEnable(GL11.GL_BLEND);
         glCullFace(GL_BACK);
         GL11.glClearColor(0f, 0.6f, 1f, 1);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

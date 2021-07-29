@@ -85,7 +85,7 @@ public class Main {
         GUI.addElement(new GUIElement("mylogo.png", new Vector2f(-0.85f, -0.85f), new Vector2f(0.15f)));
 
         FontType font = new FontType(Loader.loadTexture("verdana.png").getTextureID(), Loader.loadFontFile("verdana.fnt"));
-        GUIText text = new GUIText("fps","0", 1, font, new Vector2f(0), 1f, false);
+        GUIText text = new GUIText("fps","0", 1, font, new Vector2f(0f), 1f, false);
         text.setColour(1, 1, 1);
 
         double dt = 0; double accum = 0;

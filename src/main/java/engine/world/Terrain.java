@@ -3,20 +3,15 @@ package engine.world;
 import engine.Loader;
 import engine.graphics.Light;
 import engine.graphics.Material;
-import engine.graphics.Texture;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TerrainShader;
-import engine.world.World;
 import org.joml.Vector2f;
-import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.system.CallbackI;
 import utility.Config;
 import utility.Utility;
 
@@ -35,6 +30,8 @@ public class Terrain {
     private float[][] heights;
 
     private String heightMap;
+    private boolean randomlyGenerated = false;
+    private HeightsGenerator generator;
 
     private float width;
     private float height;
@@ -59,6 +56,13 @@ public class Terrain {
         this.heightMap = heightMap;
         this.position = position;
         this.resolution = resolution;
+        // If no height map specified, we randomly generate
+        if (heightMap == "" || heightMap == null) {
+            randomlyGenerated = true;
+            generator = new HeightsGenerator();
+            generateModelFromRandom();
+            return;
+        }
         // Read the height map
         try {
             BufferedImage i = ImageIO.read(
@@ -172,7 +176,7 @@ public class Terrain {
      * @param z
      * @return
      */
-    private float sampleModel(float x, float z) {
+    private float sampleModelFromHeightmap(float x, float z) {
         // Find real location
         float rasterX = ((x + this.width / 2) / this.width) * (raster.getWidth() - 1);
         float rasterZ = ((z + this.height / 2) / this.height) * (raster.getHeight() - 1);
@@ -195,7 +199,6 @@ public class Terrain {
             }
         }
         // Fetch these locations from the heightmap
-        //this.raster.getPixel(floorX, floorZ, buff);
         float value = 0;
         value = (image.getRGB(floorX, floorZ) >> 16) & 0xff;
         float y1 = (value / 255f) * yScale;
@@ -235,7 +238,7 @@ public class Terrain {
                 // Positions
                 Vector2f loc = modelLocationFromGrid(j, i);
                 float x = loc.x; float z = loc.y;
-                float sampleHeight = sampleModel(x, z);
+                float sampleHeight = sampleModelFromHeightmap(x, z);
                 heights[j][i] = sampleHeight;
                 vertices[vertexPointer*3] = x;
                 vertices[vertexPointer*3+1] = sampleHeight;
@@ -246,13 +249,12 @@ public class Terrain {
                 float x_next = (float)Math.min(j + 1, resolution - 1)/((float)resolution - 1) * width - width / 2;
                 float z_prev = (float)Math.max(i - 1, 0)/((float)resolution - 1) * height - height / 2;
                 float z_next = (float)Math.min(i + 1, resolution - 1)/((float)resolution - 1) * height - height / 2;
-
                 // The points to consider
-                Vector3f current = new Vector3f(x, sampleModel(x,z), z);
-                Vector3f prev_x = new Vector3f(x_prev, sampleModel(x_prev, z), z);
-                Vector3f next_x = new Vector3f(x_next, sampleModel(x_next, z), z);
-                Vector3f prev_z = new Vector3f(x, sampleModel(x, z_prev), z_prev);
-                Vector3f next_z = new Vector3f(x, sampleModel(x, z_next), z_next);
+                Vector3f current = new Vector3f(x, sampleModelFromHeightmap(x,z), z);
+                Vector3f prev_x = new Vector3f(x_prev, sampleModelFromHeightmap(x_prev, z), z);
+                Vector3f next_x = new Vector3f(x_next, sampleModelFromHeightmap(x_next, z), z);
+                Vector3f prev_z = new Vector3f(x, sampleModelFromHeightmap(x, z_prev), z_prev);
+                Vector3f next_z = new Vector3f(x, sampleModelFromHeightmap(x, z_next), z_next);
                 // Vectors from current to the other points, grid aligned
                 Vector3f xn = new Vector3f(); Vector3f xp = new Vector3f();
                 Vector3f zn = new Vector3f(); Vector3f zp = new Vector3f();
@@ -262,8 +264,11 @@ public class Terrain {
                 Vector3f avg_x = new Vector3f(); Vector3f avg_z = new Vector3f();
                 float angle_x = 0; float angle_z = 0;
                 angle_x = xn.angle(xp); angle_z = zn.angle(zp);
+                if (next_x.y <= current.y || prev_x.y <= current.y) angle_x = (float) Math.PI * 2 - angle_x;
+                if (next_z.y <= current.y || prev_z.y <= current.y) angle_z = (float) Math.PI * 2 - angle_z;
                 xn.rotateZ(angle_x / 2f, avg_x); avg_x.normalize();
                 zn.rotateX(-angle_z / 2f, avg_z); avg_z.normalize();
+
                 Vector3f normal = new Vector3f();
                 avg_x.add(avg_z, normal); normal.div(2f);
                 normals[vertexPointer*3] = normal.x;
@@ -295,4 +300,69 @@ public class Terrain {
         this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
     }
 
+    private void generateModelFromRandom() {
+        heights = new float[resolution][resolution];
+        int vertexCount = resolution * resolution;
+        float vertices[] = new float[vertexCount * 3];
+        float normals[] = new float[vertexCount * 3];
+        float textureCoords[] = new float[vertexCount * 2];
+        int[] indices = new int[6*(resolution-1)*(resolution-1)];
+        int vertexPointer = 0;
+        for(int i = 0 ;i < resolution; i++){
+            for(int j = 0; j < resolution; j++){
+                vertices[vertexPointer * 3] = (float) j / ((float) resolution - 1) * width - width / 2;
+                float height = getRandomHeight(j, i);
+                vertices[vertexPointer * 3 + 1] = height;
+                heights[j][i] = height;
+                vertices[vertexPointer * 3 + 2] = (float) i / ((float) resolution - 1) * width - width / 2;
+
+                Vector3f normal = calculateRandomNormal(j, i);
+                normals[vertexPointer * 3] = normal.x;
+                normals[vertexPointer * 3 + 1] = normal.y;
+                normals[vertexPointer * 3 + 2] = normal.z;
+                textureCoords[vertexPointer * 2] = (float) j / ((float) resolution - 1);
+                textureCoords[vertexPointer * 2 + 1] = (float) i / ((float) resolution - 1);
+                vertexPointer++;
+            }
+        }
+        // Indices
+        int pointer = 0;
+        for(int gz=0;gz<resolution-1;gz++){
+            for(int gx=0;gx<resolution-1;gx++){
+                int topLeft = (gz*resolution)+gx;
+                int topRight = topLeft + 1;
+                int bottomLeft = ((gz+1)*resolution)+gx;
+                int bottomRight = bottomLeft + 1;
+                indices[pointer++] = topLeft;
+                indices[pointer++] = bottomLeft;
+                indices[pointer++] = topRight;
+                indices[pointer++] = topRight;
+                indices[pointer++] = bottomLeft;
+                indices[pointer++] = bottomRight;
+            }
+        }
+        this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
+    }
+
+    private Vector3f calculateRandomNormal(int x, int z){
+        float heightL = getRandomHeight(x-1, z);
+        float heightR = getRandomHeight(x+1, z);
+        float heightD = getRandomHeight(x, z-1);
+        float heightU = getRandomHeight(x, z+1);
+        Vector3f normal = new Vector3f(heightL-heightR, 2f, heightD - heightU);
+        normal.normalize();
+        return normal;
+    }
+
+    private float getRandomHeight(int x, int z) {
+        return generator.generateHeight(x, z);
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
+    }
 }

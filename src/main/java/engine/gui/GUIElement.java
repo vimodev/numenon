@@ -1,5 +1,6 @@
 package engine.gui;
 
+import engine.Loader;
 import engine.graphics.Texture;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -12,7 +13,7 @@ public class GUIElement {
     private Vector2f scale;
 
     public GUIElement(String texture, Vector2f position, Vector2f scale) {
-        this.texture = new Texture(texture);
+        this.texture = Loader.loadTexture(texture);
         this.position = position;
         this.scale = scale;
     }

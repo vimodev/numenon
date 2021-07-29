@@ -44,26 +44,29 @@ public class Loader {
     public static Model loadToVAO(float[] positions, float[] textureCoordinates, float[] normals, int[] indices) {
         int vaoID = createVAO();
         bindIndicesBuffer(indices);
-        storeDataInAttributeList(0, 3, positions);
-        storeDataInAttributeList(1, 2, textureCoordinates);
-        storeDataInAttributeList(2, 3, normals);
+        List<Integer> modelVBOs = new ArrayList<>();
+        modelVBOs.add(storeDataInAttributeList(0, 3, positions));
+        modelVBOs.add(storeDataInAttributeList(1, 2, textureCoordinates));
+        modelVBOs.add(storeDataInAttributeList(2, 3, normals));
         unbindVAO();
-        return new Model(vaoID, indices.length);
+        return new Model(vaoID, indices.length, modelVBOs);
     }
 
     public static Model loadToVAO(float[] positions, float[] textureCoordinates) {
         int vaoID = createVAO();
-        storeDataInAttributeList(0, 2, positions);
-        storeDataInAttributeList(1, 2, textureCoordinates);
+        List<Integer> modelVBOs = new ArrayList<>();
+        modelVBOs.add(storeDataInAttributeList(0, 2, positions));
+        modelVBOs.add(storeDataInAttributeList(1, 2, textureCoordinates));
         unbindVAO();
-        return new Model(vaoID, positions.length);
+        return new Model(vaoID, positions.length, modelVBOs);
     }
 
     public static Model loadToVAO(float[] positions) {
         int vaoID = createVAO();
-        storeDataInAttributeList(0, 2, positions);
+        List<Integer> modelVBOs = new ArrayList<>();
+        modelVBOs.add(storeDataInAttributeList(0, 2, positions));
         unbindVAO();
-        return new Model(vaoID, positions.length / 2);
+        return new Model(vaoID, positions.length / 2, modelVBOs);
     }
 
     public static Model loadModel(String objFile, String textureFile) {
@@ -171,7 +174,7 @@ public class Loader {
      * @param attributeNumber
      * @param data
      */
-    private static void storeDataInAttributeList(int attributeNumber, int dimensions, float[] data) {
+    private static int storeDataInAttributeList(int attributeNumber, int dimensions, float[] data) {
         int vboID = GL15.glGenBuffers();
         vbos.add(vboID);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
@@ -179,6 +182,7 @@ public class Loader {
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
         GL20.glVertexAttribPointer(attributeNumber, dimensions, GL11.GL_FLOAT, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        return vboID;
     }
 
     private static void bindVAO(int vaoID) {

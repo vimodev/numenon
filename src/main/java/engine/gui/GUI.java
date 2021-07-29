@@ -37,8 +37,7 @@ public class GUI {
         FontType font = text.getFont();
         TextMeshData data = font.loadText(text);
         Model model = Loader.loadToVAO(data.getVertexPositions(), data.getTextureCoords());
-        int vao = model.getVaoID();
-        text.setMeshInfo(vao, data.getVertexCount());
+        text.setMeshInfo(model);
         List<GUIText> textBatch = texts.get(font);
         if (textBatch == null) {
             textBatch = new ArrayList<>();

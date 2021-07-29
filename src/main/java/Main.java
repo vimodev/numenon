@@ -1,14 +1,10 @@
 import engine.Loader;
 import engine.Window;
-import engine.graphics.Texture;
 import engine.gui.GUI;
 import engine.gui.GUIElement;
-import engine.gui.GUIRenderer;
-import engine.gui.fonts.TextController;
 import engine.gui.fonts.fontMeshCreator.FontType;
 import engine.gui.fonts.fontMeshCreator.GUIText;
 import engine.world.World;
-import engine.graphics.Renderer;
 import engine.world.WorldBuilder;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -17,8 +13,6 @@ import org.lwjgl.opengl.GL;
 import utility.Config;
 import utility.Global;
 import utility.Timer;
-
-import java.io.File;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -92,6 +86,7 @@ public class Main {
 
         FontType font = new FontType(Loader.loadTexture("verdana.png").getTextureID(), Loader.loadFontFile("verdana.fnt"));
         GUIText text = new GUIText("fps","0", 1, font, new Vector2f(0), 1f, false);
+        text.setColour(1, 1, 1);
 
         double dt = 0; double accum = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
@@ -111,8 +106,7 @@ public class Main {
             accum += dt;
             if (accum >= 1) {
                 accum -= 1;
-                text.remove();
-                text = new GUIText("fps", String.format("%.2f", frameTimer.fps()), 1, font, new Vector2f(0), 1f, false);
+                text.setContent(String.format("%.2f", frameTimer.fps()));
             }
 
             glfwSwapBuffers(window.getWindow()); // swap the color buffers

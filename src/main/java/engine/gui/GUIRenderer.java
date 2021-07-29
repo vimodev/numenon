@@ -3,7 +3,6 @@ package engine.gui;
 import engine.Loader;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
-import engine.gui.fonts.TextController;
 import engine.gui.fonts.fontRendering.FontRenderer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -33,7 +32,7 @@ public class GUIRenderer {
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
         shader.unuse();
-        TextController.render();
+        FontRenderer.render(GUI.getTexts());
     }
 
 }

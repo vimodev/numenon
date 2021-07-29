@@ -1,5 +1,6 @@
 package engine.gui.fonts.fontRendering;
 
+import engine.graphics.models.Model;
 import engine.gui.fonts.fontMeshCreator.FontType;
 import engine.gui.fonts.fontMeshCreator.GUIText;
 import org.lwjgl.opengl.GL11;
@@ -34,12 +35,13 @@ public class FontRenderer {
 	}
 	
 	private static void renderText(GUIText text) {
-		GL30.glBindVertexArray(text.getMesh());
+		Model mesh = text.getMesh();
+		GL30.glBindVertexArray(mesh.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
 		shader.setUniform("translation", text.getPosition());
 		shader.setUniform("colour", text.getColour());
-		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, text.getVertexCount());
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, mesh.getVertexCount());
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glEnableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);

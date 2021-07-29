@@ -1,10 +1,11 @@
 package engine.gui.fonts.fontMeshCreator;
 
 
-import engine.gui.fonts.TextController;
+import engine.Loader;
+import engine.graphics.models.Model;
+import engine.gui.GUI;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL30;
 
 /**
  * Represents a piece of text in the game.
@@ -18,8 +19,7 @@ public class GUIText {
 	private float fontSize;
 	private String name;
 
-	private int textMeshVao;
-	private int vertexCount;
+	private Model mesh;
 	private Vector3f colour = new Vector3f(0f, 0f, 0f);
 
 	private Vector2f position;
@@ -64,7 +64,15 @@ public class GUIText {
 		this.position = position;
 		this.lineMaxSize = maxLineLength;
 		this.centerText = centered;
-		TextController.loadText(this);
+		GUI.loadText(this);
+	}
+
+	public void setContent(String text) {
+		this.textString = text;
+		mesh.destroy();
+		TextMeshData data = font.loadText(this);
+		Model model = Loader.loadToVAO(data.getVertexPositions(), data.getTextureCoords());
+		setMeshInfo(model);
 	}
 
 	public String getName() {
@@ -79,7 +87,7 @@ public class GUIText {
 	 * Remove the text from the screen.
 	 */
 	public void remove() {
-		TextController.removeText(this);
+		GUI.removeText(this);
 	}
 
 	/**
@@ -132,29 +140,15 @@ public class GUIText {
 	 * @return the ID of the text's VAO, which contains all the vertex data for
 	 *         the quads on which the text will be rendered.
 	 */
-	public int getMesh() {
-		return textMeshVao;
+	public Model getMesh() {
+		return mesh;
 	}
 
 	/**
 	 * Set the VAO and vertex count for this text.
-	 * 
-	 * @param vao
-	 *            - the VAO containing all the vertex data for the quads on
-	 *            which the text will be rendered.
-	 * @param verticesCount
-	 *            - the total number of vertices in all of the quads.
 	 */
-	public void setMeshInfo(int vao, int verticesCount) {
-		this.textMeshVao = vao;
-		this.vertexCount = verticesCount;
-	}
-
-	/**
-	 * @return The total number of vertices of all the text's quads.
-	 */
-	public int getVertexCount() {
-		return this.vertexCount;
+	public void setMeshInfo(Model model) {
+		this.mesh = model;
 	}
 
 	/**

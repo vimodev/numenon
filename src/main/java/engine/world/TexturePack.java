@@ -1,5 +1,6 @@
 package engine.world;
 
+import engine.Loader;
 import engine.graphics.Texture;
 
 public class TexturePack {
@@ -11,11 +12,11 @@ public class TexturePack {
     private Texture gTexture;
 
     public TexturePack(String blendMap, String backgroundTexture, String rTexture, String gTexture, String bTexture) {
-        this.blendMap = new Texture(blendMap);
-        this.backgroundTexture = new Texture(backgroundTexture);
-        this.rTexture = new Texture(rTexture);
-        this.gTexture = new Texture(gTexture);
-        this.bTexture = new Texture(bTexture);
+        this.blendMap = Loader.loadTexture(blendMap);
+        this.backgroundTexture = Loader.loadTexture(backgroundTexture);
+        this.rTexture = Loader.loadTexture(rTexture);
+        this.gTexture = Loader.loadTexture(gTexture);
+        this.bTexture = Loader.loadTexture(bTexture);
     }
 
     public TexturePack(Texture blendMap, Texture backgroundTexture, Texture rTexture, Texture gTexture, Texture bTexture) {

@@ -7,12 +7,14 @@ import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TerrainShader;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import utility.Config;
+import utility.Global;
 import utility.Timer;
 import utility.Utility;
 
@@ -33,15 +35,18 @@ public class Terrain {
 
     private String heightMap;
     private boolean randomlyGenerated = false;
-    private HeightsGenerator generator;
+
+    public int x_offset = 0;
+    public int z_offset = 0;
 
     private float width;
     private float height;
     private int resolution;
     private float yScale;
 
-    private Shader shader;
+    private static Shader shader = new TerrainShader();
     private Model model;
+    public boolean readyToRender = true;
 
     private Vector3f position;
 
@@ -49,8 +54,8 @@ public class Terrain {
 
     private TexturePack texturePack;
 
-    public Terrain(String heightMap, float width, float height, float yScale, int resolution, Vector3f position, TexturePack texturePack) {
-        this.shader = new TerrainShader();
+    public Terrain(String heightMap, float width, float height, float yScale, int resolution, Vector3f position, TexturePack texturePack,
+                   int x_offset, int z_offset) {
         this.texturePack = texturePack;
         this.width = width;
         this.height = height;
@@ -58,10 +63,11 @@ public class Terrain {
         this.heightMap = heightMap;
         this.position = position;
         this.resolution = resolution;
+        this.x_offset = x_offset;
+        this.z_offset = z_offset;
         // If no height map specified, we randomly generate
         if (heightMap == "" || heightMap == null) {
             randomlyGenerated = true;
-            generator = new HeightsGenerator();
             generateModelFromRandom();
             return;
         }
@@ -82,6 +88,10 @@ public class Terrain {
 
     public void setTexturePack(TexturePack texturePack) {
         this.texturePack = texturePack;
+    }
+
+    public Vector2i getOffsets() {
+        return new Vector2i(x_offset, z_offset);
     }
 
     /**
@@ -299,10 +309,14 @@ public class Terrain {
                 indices[pointer++] = bottomRight;
             }
         }
+        if (Thread.currentThread().getName() != "main") {
+            readyToRender = false;
+            return;
+        }
         this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
     }
 
-    private void generateModelFromRandom() {
+    private synchronized void generateModelFromRandom() {
 
         heights = new float[resolution][resolution];
         int vertexCount = resolution * resolution;
@@ -339,17 +353,24 @@ public class Terrain {
                 e.printStackTrace();
             }
         }
-        this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
+        if (Thread.currentThread().getName().equals("main")) {
+            this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
+        } else {
+            Global.terrain_queue_mutex.lock();
+            Loader.addToTerrainQueue(new TerrainQueueItem(this, vertices, textureCoords, normals, indices));
+            readyToRender = false;
+            Global.terrain_queue_mutex.unlock();
+        }
     }
 
     public float getRandomHeight(int x, int z) {
         if (x-1 < 0 || z-1 < 0 || x+1 >= resolution || z+1 >= resolution) {
-            return generator.generateHeight(x, z);
+            return HeightsGenerator.generateHeight(x + x_offset, z + z_offset);
         }
         if (heights[x][z] != 0) {
             return heights[x][z];
         }
-        float h = generator.generateHeight(x, z);
+        float h = HeightsGenerator.generateHeight(x + x_offset, z + z_offset);
         heights[x][z] = h;
         return h;
     }
@@ -371,5 +392,37 @@ public class Terrain {
 
     public float getHeight() {
         return height;
+    }
+
+    public float getyScale() {
+        return yScale;
+    }
+
+    public int getResolution() {
+        return resolution;
+    }
+
+    public Shader getShader() {
+        return shader;
+    }
+
+    public Model getModel() {
+        return model;
+    }
+
+    public Vector3f getPosition() {
+        return position;
+    }
+
+    public Material getMaterial() {
+        return material;
+    }
+
+    public TexturePack getTexturePack() {
+        return texturePack;
+    }
+
+    public void setModel(Model model) {
+        this.model = model;
     }
 }

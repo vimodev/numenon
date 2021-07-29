@@ -16,17 +16,21 @@ public class World {
     protected List<Entity> entities;
     protected List<Light> lights;
     protected Camera camera;
-    protected Terrain terrain;
     protected Player player;
+
+    protected Terrain terrain;
+    protected Terrain[] neighbours;
 
     protected List<Entity> renderedEntities;
     protected List<Entity> collisionCheckedEntities;
+    protected Thread neighbourGenerator;
 
     public World(String name) {
         entities = new ArrayList<>();
         lights = new ArrayList<>();
         renderedEntities = new ArrayList<>();
         collisionCheckedEntities = new ArrayList<>();
+        this.neighbours = new Terrain[8];
         this.name = name;
     }
 
@@ -38,6 +42,9 @@ public class World {
         this.name = name;
         this.player = player;
         this.terrain = terrain;
+        this.neighbours = new Terrain[8];
+        this.neighbourGenerator = new Thread(new GenerateNeighbours(this));
+        this.neighbourGenerator.start();
     }
 
     public void updateLists() {
@@ -78,6 +85,13 @@ public class World {
 
     public void setTerrain(Terrain terrain) {
         this.terrain = terrain;
+        this.neighbours = new Terrain[8];
+        this.neighbourGenerator = new Thread(new GenerateNeighbours(this));
+        this.neighbourGenerator.start();
+    }
+
+    public void setNewCenter(Terrain center) {
+        this.terrain = center;
     }
 
     public Terrain getTerrain() {
@@ -134,5 +148,9 @@ public class World {
 
     public void setCamera(Camera camera) {
         this.camera = camera;
+    }
+
+    public Terrain[] getNeighbours() {
+        return neighbours;
     }
 }

@@ -1,5 +1,6 @@
 package engine.world;
 
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 public class GenerationJob implements Runnable {
@@ -17,7 +18,9 @@ public class GenerationJob implements Runnable {
 
     private Terrain terrain;
 
-    public GenerationJob(int offset, int numberOfThreads, float[][] heights, int resolution, float[] vertices, float[] normals, int[] indices, float[] textureCoords, Terrain terrain) {
+    public GenerationJob(int offset, int numberOfThreads, float[][] heights, int resolution, float[] vertices,
+                         float[] normals, int[] indices, float[] textureCoords, Terrain terrain
+                         ) {
         this.offset = offset;
         this.numberOfThreads = numberOfThreads;
         this.heights = heights;

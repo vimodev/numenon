@@ -14,6 +14,8 @@ import utility.Config;
 import utility.Global;
 import utility.Timer;
 
+import java.awt.*;
+
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -105,6 +107,7 @@ public class Main {
             accum += dt;
             if (accum >= 1) {
                 accum -= 1;
+                Loader.handleTerrainQueue();
                 text.setContent(String.format("%.2f", frameTimer.fps()));
             }
 

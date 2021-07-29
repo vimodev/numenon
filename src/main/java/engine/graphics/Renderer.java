@@ -1,6 +1,7 @@
 package engine.graphics;
 
 import engine.Camera;
+import engine.world.Terrain;
 import engine.world.World;
 import engine.entities.Entity;
 import engine.graphics.models.Model;
@@ -47,6 +48,12 @@ public class Renderer {
         }
         for (Entity entity : world.getRenderedEntities()) {
             render(entity, world.getCamera(), world.getLights());
+        }
+        Terrain[] neighbours = world.getNeighbours();
+        for (int i = 0; i < 8; i++) {
+            if (neighbours[i] != null && neighbours[i].readyToRender) {
+                neighbours[i].render(world);
+            }
         }
     }
 

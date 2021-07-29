@@ -7,11 +7,13 @@ import de.javagl.obj.ObjUtils;
 import engine.graphics.models.Model;
 import engine.graphics.Texture;
 import engine.graphics.shaders.Shader;
+import engine.world.TerrainQueueItem;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import utility.Config;
+import utility.Global;
 import utility.Utility;
 
 import java.io.*;
@@ -27,6 +29,8 @@ import java.util.Map;
  */
 public class Loader {
 
+    private static List<TerrainQueueItem> terrainQueue = new ArrayList<>();
+
     private static List<Integer> vaos = new ArrayList<Integer>();
     private static List<Integer> vbos = new ArrayList<Integer>();
     private static List<Shader> shaders = new ArrayList<>();
@@ -35,13 +39,27 @@ public class Loader {
     private static Map<String, Texture> loadedTextures = new HashMap<>();
     private static Map<String, Map<String, Model>> loadedModels = new HashMap<>();
 
+    public static void addToTerrainQueue(TerrainQueueItem item) {
+        terrainQueue.add(item);
+    }
+
+    public static void handleTerrainQueue() {
+        Global.terrain_queue_mutex.lock();
+        for (TerrainQueueItem item : terrainQueue) {
+            item.target.setModel(loadToVAO(item.vertices, item.textureCoords, item.normals, item.indices));
+            item.target.readyToRender = true;
+        }
+        terrainQueue.clear();
+        Global.terrain_queue_mutex.unlock();
+    }
+
     /**
      * Given attributes load to a Model
      * @param positions
      * @param indices
      * @return
      */
-    public static Model loadToVAO(float[] positions, float[] textureCoordinates, float[] normals, int[] indices) {
+    public static synchronized Model loadToVAO(float[] positions, float[] textureCoordinates, float[] normals, int[] indices) {
         int vaoID = createVAO();
         bindIndicesBuffer(indices);
         List<Integer> modelVBOs = new ArrayList<>();
@@ -52,7 +70,7 @@ public class Loader {
         return new Model(vaoID, indices.length, modelVBOs);
     }
 
-    public static Model loadToVAO(float[] positions, float[] textureCoordinates) {
+    public static synchronized Model loadToVAO(float[] positions, float[] textureCoordinates) {
         int vaoID = createVAO();
         List<Integer> modelVBOs = new ArrayList<>();
         modelVBOs.add(storeDataInAttributeList(0, 2, positions));
@@ -61,7 +79,7 @@ public class Loader {
         return new Model(vaoID, positions.length, modelVBOs);
     }
 
-    public static Model loadToVAO(float[] positions) {
+    public static synchronized Model loadToVAO(float[] positions) {
         int vaoID = createVAO();
         List<Integer> modelVBOs = new ArrayList<>();
         modelVBOs.add(storeDataInAttributeList(0, 2, positions));
@@ -69,7 +87,7 @@ public class Loader {
         return new Model(vaoID, positions.length / 2, modelVBOs);
     }
 
-    public static Model loadModel(String objFile, String textureFile) {
+    public static synchronized Model loadModel(String objFile, String textureFile) {
         // If model with that model and texture exists already, return it.
         if (loadedModels.containsKey(objFile) && loadedModels.get(objFile).containsKey(textureFile)) {
             return loadedModels.get(objFile).get(textureFile);
@@ -108,7 +126,7 @@ public class Loader {
         return model;
     }
 
-    public static File loadFontFile(String filename) {
+    public static synchronized File loadFontFile(String filename) {
         return new File(Loader.class.getResource(Config.FONT_LOCATION + filename).getFile());
     }
 
@@ -117,7 +135,7 @@ public class Loader {
      * @param fileName
      * @return
      */
-    public static Texture loadTexture(String fileName) {
+    public static synchronized Texture loadTexture(String fileName) {
         // If texture has not been loaded before
         if (loadedTextures.containsKey(fileName)) {
             // load it
@@ -154,7 +172,7 @@ public class Loader {
      * Track the given shader for clean up
      * @param shader
      */
-    public static void declareShader(Shader shader) {
+    public static synchronized void declareShader(Shader shader) {
         shaders.add(shader);
     }
 
@@ -162,7 +180,7 @@ public class Loader {
      * Create a new VAO
      * @return
      */
-    private static int createVAO() {
+    private static synchronized int createVAO() {
         int vaoID = GL30.glGenVertexArrays();
         vaos.add(vaoID);
         bindVAO(vaoID);
@@ -174,7 +192,7 @@ public class Loader {
      * @param attributeNumber
      * @param data
      */
-    private static int storeDataInAttributeList(int attributeNumber, int dimensions, float[] data) {
+    private static synchronized int storeDataInAttributeList(int attributeNumber, int dimensions, float[] data) {
         int vboID = GL15.glGenBuffers();
         vbos.add(vboID);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
@@ -185,15 +203,15 @@ public class Loader {
         return vboID;
     }
 
-    private static void bindVAO(int vaoID) {
+    private static synchronized void bindVAO(int vaoID) {
         GL30.glBindVertexArray(vaoID);
     }
 
-    private static void unbindVAO() {
+    private static synchronized void unbindVAO() {
         GL30.glBindVertexArray(0);
     }
 
-    private static void bindIndicesBuffer(int[] indices) {
+    private static synchronized void bindIndicesBuffer(int[] indices) {
         int vboID = GL15.glGenBuffers();
         vbos.add(vboID);
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboID);

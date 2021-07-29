@@ -52,7 +52,8 @@ public class WorldBuilder {
                         "grass.png",
                         "grassFlowers.png",
                         "mud.png",
-                        "path.png")
+                        "path.png"),
+                        0, 0
                 );
         world.setTerrain(terrain);
         world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 24f), new Vector3f(0)));

@@ -23,8 +23,8 @@ public class HeightsGenerator {
     }
 
     private static float getInterpolatedNoise(float x, float z) {
-        int intX = (int) x;
-        int intZ = (int) z;
+        int intX = (int) Math.floor(x);
+        int intZ = (int) Math.floor(z);
         float fX = x - intX;
         float fZ = z - intZ;
 

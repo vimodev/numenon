@@ -13,11 +13,13 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import utility.Config;
+import utility.Timer;
 import utility.Utility;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,7 +62,9 @@ public class Terrain {
         if (heightMap == "" || heightMap == null) {
             randomlyGenerated = true;
             generator = new HeightsGenerator();
+            Timer profiler = new Timer();
             generateModelFromRandom();
+            System.out.println(profiler.readDt());
             return;
         }
         // Read the height map
@@ -301,50 +305,59 @@ public class Terrain {
     }
 
     private void generateModelFromRandom() {
+
         heights = new float[resolution][resolution];
         int vertexCount = resolution * resolution;
         float vertices[] = new float[vertexCount * 3];
         float normals[] = new float[vertexCount * 3];
         float textureCoords[] = new float[vertexCount * 2];
         int[] indices = new int[6*(resolution-1)*(resolution-1)];
-        int vertexPointer = 0;
-        for(int i = 0 ;i < resolution; i++){
-            for(int j = 0; j < resolution; j++){
-                vertices[vertexPointer * 3] = (float) j / ((float) resolution - 1) * width - width / 2;
-                float height = getRandomHeight(j, i);
-                vertices[vertexPointer * 3 + 1] = height;
-                heights[j][i] = height;
-                vertices[vertexPointer * 3 + 2] = (float) i / ((float) resolution - 1) * width - width / 2;
 
-                Vector3f normal = calculateRandomNormal(j, i);
-                normals[vertexPointer * 3] = normal.x;
-                normals[vertexPointer * 3 + 1] = normal.y;
-                normals[vertexPointer * 3 + 2] = normal.z;
-                textureCoords[vertexPointer * 2] = (float) j / ((float) resolution - 1);
-                textureCoords[vertexPointer * 2 + 1] = (float) i / ((float) resolution - 1);
-                vertexPointer++;
+        // Vertex calculation
+        int NUMBER_OF_THREADS = 2;
+        List<Thread> genJobs = new ArrayList<>();
+        for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+            genJobs.add(new Thread(new GenerationJob(i, NUMBER_OF_THREADS, heights, resolution, vertices, normals, indices, textureCoords, this)));
+            genJobs.get(i).run();
+        }
+        // Indices filling
+        int INDICES_THREADS = 2;
+        List<Thread> indexJobs = new ArrayList<>();
+        for (int i = 0; i < INDICES_THREADS; i++) {
+            indexJobs.add(new Thread(new IndicesJob(resolution, indices, i, INDICES_THREADS)));
+            indexJobs.get(i).run();
+        }
+        for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+            try {
+                genJobs.get(i).join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        // Indices
-        int pointer = 0;
-        for(int gz=0;gz<resolution-1;gz++){
-            for(int gx=0;gx<resolution-1;gx++){
-                int topLeft = (gz*resolution)+gx;
-                int topRight = topLeft + 1;
-                int bottomLeft = ((gz+1)*resolution)+gx;
-                int bottomRight = bottomLeft + 1;
-                indices[pointer++] = topLeft;
-                indices[pointer++] = bottomLeft;
-                indices[pointer++] = topRight;
-                indices[pointer++] = topRight;
-                indices[pointer++] = bottomLeft;
-                indices[pointer++] = bottomRight;
+        for (int i = 0; i < INDICES_THREADS; i++) {
+            try {
+                indexJobs.get(i).join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
     }
 
-    private Vector3f calculateRandomNormal(int x, int z){
+    public float getRandomHeight(int x, int z) {
+        if (x-1 < 0 || z-1 < 0 || x+1 >= resolution || z+1 >= resolution) {
+            return generator.generateHeight(x, z);
+        }
+        if (heights[x][z] != 0) {
+            return heights[x][z];
+        }
+        float h = generator.generateHeight(x, z);
+        heights[x][z] = h;
+        return h;
+    }
+
+    public Vector3f calculateRandomNormal(int x, int z){
+        // Check if heights are already stored, if not, sample them
         float heightL = getRandomHeight(x-1, z);
         float heightR = getRandomHeight(x+1, z);
         float heightD = getRandomHeight(x, z-1);
@@ -352,10 +365,6 @@ public class Terrain {
         Vector3f normal = new Vector3f(heightL-heightR, 2f, heightD - heightU);
         normal.normalize();
         return normal;
-    }
-
-    private float getRandomHeight(int x, int z) {
-        return generator.generateHeight(x, z);
     }
 
     public float getWidth() {

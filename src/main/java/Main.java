@@ -80,7 +80,6 @@ public class Main {
      * Main game loop
      */
     public void loop() {
-
         World world = WorldBuilder.testWorld1();
         //GUI.addElement(new GUIElement("mylogo.png", new Vector2f(-0.85f, -0.85f), new Vector2f(0.15f)));
 

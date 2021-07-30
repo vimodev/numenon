@@ -5,6 +5,7 @@ import engine.graphics.Material;
 import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TextureShader;
 import engine.world.Terrain;
+import engine.world.Water;
 import engine.world.World;
 import org.joml.Vector3f;
 import utility.Config;
@@ -44,13 +45,22 @@ public class Player extends Entity {
     public void update(double dt, World world) {
         Terrain terrain = world.getTerrain();
         applyGravity(dt);
+        applyWaterBuoyancy(dt, world.getWater());
         applyJump(terrain);
         applyMovement(dt);
         applyVelocity(dt);
-        applyMovementFriction(dt, terrain);
+        applyMovementFriction(dt, terrain, world.getWater());
         checkTerrainCollision(terrain);
         if(!checkEntityCollision(world.getCollisionCheckedEntities())) {
             previousPosition = new Vector3f(position.x, position.y, position.z);
+        }
+    }
+
+    private void applyWaterBuoyancy(double dt, Water water) {
+        float level = water.getLevel();
+        if (position.y < level) {
+            float diff = level - position.y;
+            velocity.y += diff * Config.PHYSICS_BUOYANCY * (float) dt;
         }
     }
 
@@ -90,9 +100,9 @@ public class Player extends Entity {
      * Apply friction to the players horizontal velocity
      * @param dt
      */
-    private void applyMovementFriction(double dt, Terrain terrain) {
+    private void applyMovementFriction(double dt, Terrain terrain, Water water) {
         float y = terrain.sample(position.x, position.z);
-        if (position.y > y + 0.1f) return;
+        if (position.y > y + 0.1f && position.y > water.getLevel()) return;
         float ratio = (float) Math.sqrt((velocity.x * velocity.x) + (velocity.z * velocity.z)) / Config.PLAYER_MOVE_SPEED;
         float friction = (float) Math.pow(ratio, 1f / Config.PLAYER_FRICTION_SMOOTHNESS) - Config.PLAYER_FRICTION_AMOUNT;
         if (friction < 0) friction = 0;

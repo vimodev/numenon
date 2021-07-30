@@ -30,5 +30,6 @@ public class Config {
     public static float PLAYER_FRICTION_AMOUNT = 0.95f;
 
     public static float PHYSICS_GRAVITY = 9.81f;
+    public static float PHYSICS_BUOYANCY = 20f;
 
 }

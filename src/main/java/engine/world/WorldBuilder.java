@@ -51,7 +51,7 @@ public class WorldBuilder {
                         "grass_blendmap.png",
                         "grass.png",
                         "grassFlowers.png",
-                        "mud.png",
+                        "sand.png",
                         "path.png"),
                         0, 0, -2f
                 );

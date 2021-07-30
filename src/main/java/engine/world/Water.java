@@ -5,13 +5,14 @@ import engine.graphics.Light;
 import engine.graphics.Material;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
-import engine.graphics.shaders.TerrainShader;
+import engine.graphics.shaders.WaterShader;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import utility.Timer;
 import utility.Utility;
 
 import java.util.List;
@@ -26,15 +27,17 @@ public class Water {
     private Model model;
     private Shader shader;
     private Material material;
+    private Timer timer;
 
     public Water(float level, float width, float height, int resolution) {
         this.level = level;
         this.width = width;
         this.height = height;
         this.resolution = resolution;
-        this.shader = new TerrainShader();
+        this.shader = new WaterShader();
         this.material = new Material(new Vector3f(1), new Vector3f(1));
         this.position = new Vector3f(0);
+        this.timer = new Timer();
         generateModel();
     }
 
@@ -77,6 +80,8 @@ public class Water {
         shader.setUniform("materialDiffuse", material.getDiffuse());
         // Set camera position for easy access
         shader.setUniform("cameraPosition", world.getCamera().getPosition());
+        // Set time
+        shader.setUniform("time", (float) timer.readDt() * 0.5f % (float) Math.PI * 2);
         // Bind texture
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getTextureID());

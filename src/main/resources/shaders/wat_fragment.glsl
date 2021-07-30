@@ -6,16 +6,7 @@ in vec3 pass_normal;
 
 out vec4 pixel_colour;
 
-// Blendmap texture stuff
-uniform sampler2D backgroundTexture;
-uniform sampler2D rTexture;
-uniform sampler2D gTexture;
-uniform sampler2D bTexture;
-uniform sampler2D blendMap;
-
-// World stuff
-uniform float waterLevel;
-
+uniform sampler2D textureSampler;
 // Light stuff
 uniform int numberOfLights;
 uniform vec3 lightPositions[256];
@@ -54,12 +45,7 @@ void main() {
     for (int i = 0; i < numberOfLights; i++) {
         pixel_colour = pixel_colour + attenuation(i) * lighting(i);
     }
+    vec2 texCoord = mod(pass_position.xz / 25, 1);
     // Apply texture
-    vec2 tiledTextureCoords = mod(pass_position.xz / 5, 1);
-    // Sand near water
-    float randomOffset = ((sin(pass_position.x / 1.25f) + cos(pass_position.z)) + 2) / 5 - 0.5f;
-    float mix = min(1, max(0, waterLevel + 1 - (pass_position.y + randomOffset)));
-    vec4 finalTextureColour = mix * texture(gTexture, tiledTextureCoords) + (1 - mix) * texture(backgroundTexture, tiledTextureCoords);
-
-    pixel_colour = pixel_colour * finalTextureColour;
+    pixel_colour = pixel_colour * texture(textureSampler, texCoord);
 }

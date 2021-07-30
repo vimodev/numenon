@@ -196,6 +196,8 @@ public class Terrain {
         GL13.glActiveTexture(GL13.GL_TEXTURE4);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texturePack.getBlendMap().getTextureID());
         shader.setUniform("blendMap", 4);
+        // Water level
+        shader.setUniform("waterLevel", waterLevel);
         // Actually render
         GL11.glDrawElements(GL11.GL_TRIANGLES, model.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
         // Unbind everything

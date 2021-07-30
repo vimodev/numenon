@@ -100,6 +100,14 @@ public class Terrain {
         generateModelFromRaster();
     }
 
+    public float getWaterLevel() {
+        return waterLevel;
+    }
+
+    public void setWaterLevel(float waterLevel) {
+        this.waterLevel = waterLevel;
+    }
+
     public void populate() {
         terrainEntities.clear();
         for (int i = 0; i < NUM_TREES; i++) {

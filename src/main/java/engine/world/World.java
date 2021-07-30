@@ -102,10 +102,10 @@ public class World {
         this.player = player;
     }
 
-    public void setTerrain(Terrain terrain, float waterLevel) {
+    public void setTerrain(Terrain terrain) {
         this.terrain = terrain;
         this.neighbours = new Terrain[8];
-        this.water = new Water(waterLevel, terrain.getWidth() * 3, terrain.getHeight() * 3, terrain.getResolution());
+        this.water = new Water(terrain.getWaterLevel(), terrain.getWidth() * 3, terrain.getHeight() * 3, terrain.getResolution());
         this.neighbourGenerator = new Thread(new GenerateNeighbours(this));
         this.neighbourGenerator.start();
     }

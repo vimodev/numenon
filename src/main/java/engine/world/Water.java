@@ -60,7 +60,7 @@ public class Water {
         GL20.glEnableVertexAttribArray(2);
         // Matrices to set
         shader.setUniform("transformationMatrix", Utility.createTransformationMatrix(
-                this.position.add(0, level, 0, new Vector3f()),
+                new Vector3f(position.x, level, position.y),
                 new Vector3f(0),
                 new Vector3f(1))
         );

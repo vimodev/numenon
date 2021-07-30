@@ -54,9 +54,9 @@ public class WorldBuilder {
                         "grassFlowers.png",
                         "sand.png",
                         "stone.png"),
-                        0, 0, -2f
+                        0, 0, -4f
                 );
-        world.setTerrain(terrain, -2f);
+        world.setTerrain(terrain);
         world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 9f), new Vector3f(0)));
         return world;
     }

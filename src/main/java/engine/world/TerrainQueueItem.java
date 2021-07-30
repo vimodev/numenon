@@ -1,5 +1,9 @@
 package engine.world;
 
+/**
+ * Generic holder for an item containing calculated data
+ * for a new terrain.
+ */
 public class TerrainQueueItem {
 
     public Terrain target;

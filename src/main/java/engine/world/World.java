@@ -52,13 +52,27 @@ public class World {
         renderedEntities.clear();
         collisionCheckedEntities.clear();
         for (Entity entity : entities) {
-            float distance = entity.getPosition().distance(camera.getPosition());
-            if (distance <= Config.ENTITY_VIEW_DISTANCE) {
-                renderedEntities.add(entity);
-                // Render distance always >>>> collision distance so check that only when rendered
-                if (distance <= Config.ENTITY_COLLISION_CHECK_RADIUS) {
-                    collisionCheckedEntities.add(entity);
+            updateListsEntity(entity);
+        }
+        for (Entity entity : terrain.getTerrainEntities()) {
+            updateListsEntity(entity);
+        }
+        for (int i = 0; i < 8; i++) {
+            if (neighbours[i] != null && neighbours[i].readyToRender) {
+                for (Entity entity : neighbours[i].getTerrainEntities()) {
+                    updateListsEntity(entity);
                 }
+            }
+        }
+    }
+
+    public void updateListsEntity(Entity entity) {
+        float distance = entity.getPosition().distance(camera.getPosition());
+        if (distance <= Config.ENTITY_VIEW_DISTANCE) {
+            renderedEntities.add(entity);
+            // Render distance always >>>> collision distance so check that only when rendered
+            if (distance <= Config.ENTITY_COLLISION_CHECK_RADIUS) {
+                collisionCheckedEntities.add(entity);
             }
         }
     }

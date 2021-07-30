@@ -43,8 +43,10 @@ public class Renderer {
         Renderer.pre();
         world.updateLists();
         world.getTerrain().render(world);
+        // Also render neighbouring terrains
         Terrain[] neighbours = world.getNeighbours();
         for (int i = 0; i < 8; i++) {
+            // Only if its present and ready to render
             if (neighbours[i] != null && neighbours[i].readyToRender) {
                 neighbours[i].render(world);
             }
@@ -65,7 +67,7 @@ public class Renderer {
      */
     public static void render(Entity entity, Camera camera, List<Light> lights) {
         Model model = entity.getModel();
-        Shader shader = entity.getShader();
+        Shader shader = Entity.shader;
         Material material = entity.getMaterial();
         shader.use();
         GL30.glBindVertexArray(model.getVaoID());

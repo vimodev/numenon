@@ -4,9 +4,11 @@ import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
+import engine.entities.Entity;
 import engine.graphics.models.Model;
 import engine.graphics.Texture;
 import engine.graphics.shaders.Shader;
+import engine.world.EntityQueueItem;
 import engine.world.Terrain;
 import engine.world.TerrainQueueItem;
 import org.lwjgl.opengl.GL11;
@@ -32,6 +34,7 @@ public class Loader {
 
     private static List<TerrainQueueItem> terrainQueue = new ArrayList<>();
     private static List<Terrain> terrainDestroyQueue = new ArrayList<>();
+    private static List<EntityQueueItem> entityQueue = new ArrayList<>();
 
     private static List<Integer> vaos = new ArrayList<Integer>();
     private static List<Integer> vbos = new ArrayList<Integer>();
@@ -65,6 +68,36 @@ public class Loader {
         }
         terrainDestroyQueue.clear();
         Global.terrain_queue_mutex.unlock();
+    }
+
+    public static void addToEntityQueue(EntityQueueItem item) {
+        entityQueue.add(item);
+    }
+
+    public static void handleEntityQueue() {
+        Global.entity_queue_mutex.lock();
+        for (EntityQueueItem item : entityQueue) {
+            if (loadedModels.containsKey(item.obj) && loadedModels.get(item.obj).containsKey(item.texture)) {
+                item.target.setModel(loadedModels.get(item.obj).get(item.texture));
+                item.target.readyToRender = true;
+                continue;
+            }
+            Model model = loadToVAO(item.vertices, item.textureCoords, item.normals, item.indices);
+            // Handle unspecified texture
+            if (item.texture == null || item.texture == "") {
+                item.texture = Config.DEFAULT_TEXTURE;
+            }
+            model.setTexture(loadTexture(item.texture));
+            item.target.setModel(model);
+            item.target.readyToRender = true;
+            // Track load
+            if (!loadedModels.containsKey(item.obj)) {
+                loadedModels.put(item.obj, new HashMap<>());
+            }
+            loadedModels.get(item.obj).put(item.obj, model);
+        }
+        entityQueue.clear();
+        Global.entity_queue_mutex.unlock();
     }
 
     /**
@@ -101,7 +134,7 @@ public class Loader {
         return new Model(vaoID, positions.length / 2, modelVBOs);
     }
 
-    public static synchronized Model loadModel(String objFile, String textureFile) {
+    public static synchronized Model loadModel(Entity entity, String objFile, String textureFile) {
         // If model with that model and texture exists already, return it.
         if (loadedModels.containsKey(objFile) && loadedModels.get(objFile).containsKey(textureFile)) {
             return loadedModels.get(objFile).get(textureFile);
@@ -123,6 +156,14 @@ public class Loader {
         // Make sure OpenGL can render it
         // OpenGL cant handle double normals for instance
         object = ObjUtils.convertToRenderable(object);
+        if (Thread.currentThread().getName() != "main") {
+            Global.entity_queue_mutex.lock();
+            addToEntityQueue(new EntityQueueItem(entity, objFile, textureFile, ObjData.getVerticesArray(object),
+                    ObjData.getTexCoordsArray(object, 2, true),
+                    ObjData.getNormalsArray(object),
+                    ObjData.getFaceVertexIndicesArray(object, 3)));
+            Global.entity_queue_mutex.unlock();
+        }
         Model model = loadToVAO(ObjData.getVerticesArray(object),
                         ObjData.getTexCoordsArray(object, 2, true),
                         ObjData.getNormalsArray(object),

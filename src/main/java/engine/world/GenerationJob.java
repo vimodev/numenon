@@ -3,6 +3,9 @@ package engine.world;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
+/**
+ * Job to generate part of a terrain
+ */
 public class GenerationJob implements Runnable {
 
     private int offset;
@@ -36,21 +39,24 @@ public class GenerationJob implements Runnable {
     public void run() {
         float width = terrain.getWidth();
         float height = terrain.getHeight();
+        // This job is generating 'offset' column every 'numberOfThreads'
         for(int i = offset ;i < resolution; i += numberOfThreads){
             int vertexPointer = resolution * i;
             for(int j = 0; j < resolution; j++){
                 float jR = (float) j / ((float) resolution - 1);
                 float iR = (float) i / ((float) resolution - 1);
+                // Set the height
                 vertices[vertexPointer * 3] = jR * width - width / 2;
                 float h = terrain.getRandomHeight(j, i);
                 vertices[vertexPointer * 3 + 1] = h;
                 heights[j][i] = h;
                 vertices[vertexPointer * 3 + 2] = iR * height - height / 2;
-
+                // Set the normal
                 Vector3f normal = terrain.calculateRandomNormal(j, i);
                 normals[vertexPointer * 3] = normal.x;
                 normals[vertexPointer * 3 + 1] = normal.y;
                 normals[vertexPointer * 3 + 2] = normal.z;
+                // Set the texture coord
                 textureCoords[vertexPointer * 2] = jR;
                 textureCoords[vertexPointer * 2 + 1] = iR;
                 vertexPointer++;

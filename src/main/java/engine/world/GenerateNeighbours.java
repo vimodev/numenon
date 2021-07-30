@@ -13,6 +13,11 @@ import java.awt.*;
 import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 
+/**
+ * This job always runs in the background
+ * it checks the camera position in the world and
+ * generates new terrain if necessary
+ */
 public class GenerateNeighbours implements Runnable {
 
     private World world;
@@ -23,6 +28,11 @@ public class GenerateNeighbours implements Runnable {
         this.timer = new Timer();
     }
 
+    /**
+     * Given offset, get index
+     * @param offset
+     * @return
+     */
     private int indexFromRelativeOffset(Vector2i offset) {
         if (offset.equals(-1, 0)) return 3;
         if (offset.equals(1, 0)) return 4;
@@ -32,6 +42,11 @@ public class GenerateNeighbours implements Runnable {
         return index;
     }
 
+    /**
+     * Given index, get offset, cumulative
+     * @param i
+     * @return
+     */
     private Vector2i offsetFromIndex(int i) {
         Vector2i offset = world.terrain.getOffsets();
         if (i <= 2) offset.y--;
@@ -41,6 +56,11 @@ public class GenerateNeighbours implements Runnable {
         return offset;
     }
 
+    /**
+     * Given index, get offset, relative to current center
+     * @param i
+     * @return
+     */
     private Vector2i relativeOffsetFromIndex(int i) {
         Vector2i offset = new Vector2i(0);
         if (i <= 2) offset.y--;
@@ -55,17 +75,22 @@ public class GenerateNeighbours implements Runnable {
         // First generate initial neighbours
         Terrain original = world.getTerrain();
         for (int i = 0; i < 8; i++) {
+            // Get the offset
             Vector2i offset = offsetFromIndex(i);
+            // Get the translation we need to do in world space
             Vector3f translation = new Vector3f(
                     original.getPosition().x + relativeOffsetFromIndex(i).x * original.getWidth(),
                     original.getPosition().y,
                     original.getPosition().z + relativeOffsetFromIndex(i).y * original.getHeight()
             );
+            // Add the neighbour
             world.neighbours[i] = new Terrain("", original.getWidth(), original.getHeight(),
                     original.getyScale(), original.getResolution(), original.getPosition().add(translation, new Vector3f()),
                     original.getTexturePack(), offset.x, offset.y);
         }
+        // Loop indefinitely
         while (true) {
+            // Do some sleeping
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -79,7 +104,7 @@ public class GenerateNeighbours implements Runnable {
             // If player is out of bounds of center map, start moving around stuff and generating
             if (Math.abs(cpos.x - tpos.x) > Math.abs(center.getWidth() / 2) ||
                     Math.abs(cpos.z - tpos.z) > Math.abs(center.getHeight() / 2)) {
-                // Do stuff
+                // Determine player offset
                 int x_offset = 0;
                 int z_offset = 0;
                 if (cpos.x - tpos.x > center.getWidth() / 2) x_offset = 1;
@@ -117,6 +142,7 @@ public class GenerateNeighbours implements Runnable {
                     arr[1] = center; center = arr[6]; arr[6] = null;
                     arr[2] = arr[4]; arr[4] = arr[7]; arr[7] = null;
                 }
+                //. Update the new center
                 world.setNewCenter(center);
                 // Now generate the missing pieces
                 for (int i = 0; i < 8; i++) {

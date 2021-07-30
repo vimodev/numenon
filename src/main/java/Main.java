@@ -108,6 +108,7 @@ public class Main {
             if (accum >= 1) {
                 accum -= 1;
                 Loader.handleTerrainQueue();
+                Loader.handleEntityQueue();
                 text.setContent(String.format("%.2f", frameTimer.fps()));
             }
 

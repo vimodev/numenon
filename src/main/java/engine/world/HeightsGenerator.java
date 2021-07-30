@@ -2,6 +2,9 @@ package engine.world;
 
 import java.util.Random;
 
+/**
+ * Random height generator based on noise
+ */
 public class HeightsGenerator {
 
     private static final float AMPLITUDE = 15f;
@@ -12,6 +15,12 @@ public class HeightsGenerator {
     private static Random random = new Random();
     private static int seed = random.nextInt(1000000000);
 
+    /**
+     * Given x and z, get a height
+     * @param x
+     * @param z
+     * @return
+     */
     public static float generateHeight(float x, float z) {
         float total = 0;
         for (int i = 1; i <= OCTAVES; i++) {
@@ -22,6 +31,12 @@ public class HeightsGenerator {
         return total;
     }
 
+    /**
+     * Given x and z, get height based on 4 surrounding integral coords
+     * @param x
+     * @param z
+     * @return
+     */
     private static float getInterpolatedNoise(float x, float z) {
         int intX = (int) Math.floor(x);
         int intZ = (int) Math.floor(z);
@@ -37,6 +52,12 @@ public class HeightsGenerator {
         return interpolate(i1, i2, fZ);
     }
 
+    /**
+     * Given int x and z get height, smoothed
+     * @param x
+     * @param z
+     * @return
+     */
     private static float getSmoothNoise(int x, int z) {
         float corners = (getNoise(x - 1, z - 1) + getNoise(x + 1, z - 1) + getNoise(x - 1, z + 1) + getNoise(x + 1, z + 1)) / 16f;
         float sides = (getNoise(x, z - 1) + getNoise(x, z + 1) + getNoise(x - 1, z) + getNoise(x + 1, z)) / 8f;
@@ -44,12 +65,25 @@ public class HeightsGenerator {
         return corners + sides + middle;
     }
 
+    /**
+     * Cosine interpolate between two values
+     * @param a
+     * @param b
+     * @param blend
+     * @return
+     */
     private static float interpolate(float a, float b, float blend) {
         double theta = blend * Math.PI;
         float f = (1f - (float) Math.cos(theta)) * 0.5f;
         return a * (1f - f) + b * f;
     }
 
+    /**
+     * Get some noise based on int x and z
+     * @param x
+     * @param z
+     * @return
+     */
     private static synchronized float getNoise(int x, int z) {
         random.setSeed((x * 3252) + (z * 325176) + seed);
         return random.nextFloat() * 2f - 1f;

@@ -3,6 +3,7 @@ package engine.entities;
 import engine.graphics.Material;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
+import engine.graphics.shaders.TextureShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -15,8 +16,9 @@ public abstract class Entity {
     protected Vector3f position;
     protected Vector3f scale;
     protected Vector3f rotation;
-    protected Shader shader;
+    public static Shader shader = new TextureShader();
     protected Material material;
+    public boolean readyToRender = true;
 
     public Entity(String name, Vector3f position, Vector3f scale, Vector3f rotation) {
         this.name = name;
@@ -26,6 +28,10 @@ public abstract class Entity {
     }
 
     public abstract boolean isColliding(Vector3f checkedPosition);
+
+    public void setModel(Model model) {
+        this.model = model;
+    }
 
     /**
      * Gets the transformation matrix of this entity
@@ -37,10 +43,6 @@ public abstract class Entity {
 
     public Model getModel() {
         return model;
-    }
-
-    public Shader getShader() {
-        return shader;
     }
 
     public Material getMaterial() {

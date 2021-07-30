@@ -1,5 +1,8 @@
 package engine.world;
 
+/**
+ * Thread job to fill the indices buffer of a model
+ */
 public class IndicesJob implements Runnable {
 
     private int resolution;
@@ -16,8 +19,10 @@ public class IndicesJob implements Runnable {
 
     @Override
     public void run() {
+        // We only do the columns indicated by offset
         for(int gz=offset;gz<resolution-1; gz += numberOfThreads){
             int pointer = 6 * gz * (resolution - 1);
+            // And all those rows
             for(int gx=0;gx<resolution-1;gx++){
                 int topLeft = (gz*resolution)+gx;
                 int topRight = topLeft + 1;

@@ -2,6 +2,7 @@ package engine.entities;
 
 import engine.Loader;
 import engine.graphics.Material;
+import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TextureShader;
 import engine.world.Terrain;
 import engine.world.World;
@@ -28,8 +29,7 @@ public class Player extends Entity {
 
     public Player(String name, Vector3f position, Vector3f scale, Vector3f rotation) {
         super(name, position, scale, rotation);
-        this.model = Loader.loadModel("warrior_cleaned.obj", "stone.png");
-        this.shader = new TextureShader();
+        this.model = Loader.loadModel(this,"warrior_cleaned.obj", "stone.png");
         this.material = new Material(new Vector3f(1), new Vector3f(1));
         this.velocity = new Vector3f(0);
         this.previousPosition = position;

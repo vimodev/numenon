@@ -43,17 +43,17 @@ public class Renderer {
         Renderer.pre();
         world.updateLists();
         world.getTerrain().render(world);
-        if (world.getPlayer() != null) {
-            render(world.getPlayer(), world.getCamera(), world.getLights());
-        }
-        for (Entity entity : world.getRenderedEntities()) {
-            render(entity, world.getCamera(), world.getLights());
-        }
         Terrain[] neighbours = world.getNeighbours();
         for (int i = 0; i < 8; i++) {
             if (neighbours[i] != null && neighbours[i].readyToRender) {
                 neighbours[i].render(world);
             }
+        }
+        if (world.getPlayer() != null) {
+            render(world.getPlayer(), world.getCamera(), world.getLights());
+        }
+        for (Entity entity : world.getRenderedEntities()) {
+            render(entity, world.getCamera(), world.getLights());
         }
     }
 

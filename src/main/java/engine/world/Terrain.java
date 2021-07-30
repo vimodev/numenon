@@ -370,12 +370,12 @@ public class Terrain {
 
     public float getRandomHeight(int x, int z) {
         if (x-1 < 0 || z-1 < 0 || x+1 >= resolution || z+1 >= resolution) {
-            return HeightsGenerator.generateHeight(x + x_offset, z + z_offset - 1);
+            return HeightsGenerator.generateHeight(x + x_offset * (resolution - 1), z + z_offset * (resolution - 1));
         }
         if (heights[x][z] != 0) {
             return heights[x][z];
         }
-        float h = HeightsGenerator.generateHeight(x + x_offset, z + z_offset - 1);
+        float h = HeightsGenerator.generateHeight(x + x_offset * (resolution - 1), z + z_offset * (resolution - 1));
         heights[x][z] = h;
         return h;
     }

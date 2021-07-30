@@ -56,7 +56,6 @@ public class GenerateNeighbours implements Runnable {
         Terrain original = world.getTerrain();
         for (int i = 0; i < 8; i++) {
             Vector2i offset = offsetFromIndex(i);
-            offset.mul(original.getResolution());
             Vector3f translation = new Vector3f(
                     original.getPosition().x + relativeOffsetFromIndex(i).x * original.getWidth(),
                     original.getPosition().y,
@@ -123,7 +122,6 @@ public class GenerateNeighbours implements Runnable {
                 for (int i = 0; i < 8; i++) {
                     if (arr[i] == null) {
                         Vector2i offset = offsetFromIndex(i);
-                        offset.mul(original.getResolution());
                         Vector3f translation = new Vector3f(
                                 relativeOffsetFromIndex(i).x * center.getWidth(),
                                 center.getPosition().y,

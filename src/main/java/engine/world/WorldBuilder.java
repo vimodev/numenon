@@ -46,14 +46,14 @@ public class WorldBuilder {
         Terrain terrain =
                 new Terrain(
                     "",
-                    500, 500, 25, 430,
+                    250, 250, 25, 215,
                     new Vector3f(0),
                     new TexturePack(
                         "grass_blendmap.png",
                         "grass.png",
                         "grassFlowers.png",
                         "sand.png",
-                        "path.png"),
+                        "stone.png"),
                         0, 0, -2f
                 );
         world.setTerrain(terrain, -2f);

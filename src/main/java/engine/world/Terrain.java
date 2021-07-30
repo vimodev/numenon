@@ -34,9 +34,9 @@ import java.util.List;
 public class Terrain {
 
     private List<Entity> terrainEntities;
-    private static final int NUM_TREES = 1000;
-    private static final int NUM_ROCKS = 1000;
-    private static final int NUM_FERNS = 100;
+    private static final int NUM_TREES = 250;
+    private static final int NUM_ROCKS = 250;
+    private static final int NUM_FERNS = 25;
 
     private Raster raster;
     private BufferedImage image;

@@ -58,8 +58,13 @@ void main() {
     vec2 tiledTextureCoords = mod(pass_position.xz / 5, 1);
     // Sand near water
     float randomOffset = ((sin(pass_position.x / 1.25f) + cos(pass_position.z)) + 2) / 5 - 0.5f;
-    float mix = min(1, max(0, waterLevel + 1 - (pass_position.y + randomOffset)));
-    vec4 finalTextureColour = mix * texture(gTexture, tiledTextureCoords) + (1 - mix) * texture(backgroundTexture, tiledTextureCoords);
+    float sandness = min(1, max(0, waterLevel + 1 - (pass_position.y + randomOffset)));
+    vec4 finalTextureColour = sandness * texture(gTexture, tiledTextureCoords) + (1 - sandness) * texture(backgroundTexture, tiledTextureCoords);
+    // Steep slopes are rocky
+    float rockiness = abs(dot(normalize(pass_normal), vec3(0, 1, 0)));
+    rockiness = min(1 - rockiness + 0.35f, 1);
+    rockiness = pow(rockiness, 15);
+    finalTextureColour = rockiness * texture(bTexture, tiledTextureCoords) + (1 - rockiness) * finalTextureColour;
 
     pixel_colour = pixel_colour * finalTextureColour;
 }

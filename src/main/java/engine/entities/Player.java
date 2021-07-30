@@ -1,7 +1,10 @@
 package engine.entities;
 
+import collada.colladaLoader.ColladaLoader;
 import engine.Loader;
 import engine.graphics.Material;
+import engine.graphics.models.AnimatedModel;
+import engine.graphics.shaders.AnimatedTextureShader;
 import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TextureShader;
 import engine.world.Terrain;
@@ -30,7 +33,11 @@ public class Player extends Entity {
 
     public Player(String name, Vector3f position, Vector3f scale, Vector3f rotation) {
         super(name, position, scale, rotation);
-        this.model = Loader.loadModel(this,"warrior_cleaned.obj", "stone.png");
+        //this.model = Loader.loadModel(this,"warrior_cleaned.obj", "stone.png");
+        this.model = Loader.loadAnimatedModel("model.dae", "player.png");
+        if (this.model instanceof AnimatedModel) {
+            ((AnimatedModel) model).doAnimation(Loader.loadAnimation("model.dae"), true);
+        }
         this.material = new Material(new Vector3f(1), new Vector3f(1));
         this.velocity = new Vector3f(0);
         this.previousPosition = position;
@@ -43,6 +50,11 @@ public class Player extends Entity {
      * @param world the world to take into account
      */
     public void update(double dt, World world) {
+        if (this.model instanceof AnimatedModel) {
+            float terrainHeight = world.getTerrain().sample(position.x, position.z);
+            float fallingFactor = position.y <= terrainHeight + 0.1f ? 1f : 0.2f;
+            ((AnimatedModel) model).update(dt * ((getHorizontalVelocity() + 0.15f) / Config.PLAYER_MOVE_SPEED) * fallingFactor);
+        }
         Terrain terrain = world.getTerrain();
         applyGravity(dt);
         applyWaterBuoyancy(dt, world.getWater());
@@ -96,6 +108,10 @@ public class Player extends Entity {
         return dir;
     }
 
+    public float getHorizontalVelocity() {
+        return (float) Math.sqrt((velocity.x * velocity.x) + (velocity.z * velocity.z));
+    }
+
     /**
      * Apply friction to the players horizontal velocity
      * @param dt
@@ -103,7 +119,7 @@ public class Player extends Entity {
     private void applyMovementFriction(double dt, Terrain terrain, Water water) {
         float y = terrain.sample(position.x, position.z);
         if (position.y > y + 0.1f && position.y > water.getLevel()) return;
-        float ratio = (float) Math.sqrt((velocity.x * velocity.x) + (velocity.z * velocity.z)) / Config.PLAYER_MOVE_SPEED;
+        float ratio = getHorizontalVelocity() / Config.PLAYER_MOVE_SPEED;
         float friction = (float) Math.pow(ratio, 1f / Config.PLAYER_FRICTION_SMOOTHNESS) - Config.PLAYER_FRICTION_AMOUNT;
         if (friction < 0) friction = 0;
         friction = (float) Math.pow(friction, dt);

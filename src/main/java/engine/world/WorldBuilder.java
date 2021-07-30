@@ -32,6 +32,7 @@ public class WorldBuilder {
                     getPlayer().update(dt, this);
                     camera.follow(getPlayer(), terrain,2.5f, 1.75f);
                     camera.lookAt(getPlayer().getPosition().add(0, 1.35f, 0, new Vector3f()));
+                    getLightByName("sun").setPosition(new Vector3f(-500f, 500, 0).add(getPlayer().getPosition()));
                 }
                 accum += dt;
                 if (accum >= 10000) accum -= 10000;
@@ -56,7 +57,7 @@ public class WorldBuilder {
                         0, 0, -2f
                 );
         world.setTerrain(terrain, -2f);
-        world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 24f), new Vector3f(0)));
+        world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 9f), new Vector3f(0)));
         return world;
     }
 

@@ -1,10 +1,17 @@
 package engine;
 
+import collada.colladaLoader.ColladaLoader;
+import collada.dataStructures.AnimatedModelData;
+import collada.dataStructures.AnimationData;
+import collada.dataStructures.MeshData;
+import collada.dataStructures.SkeletonData;
 import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
+import engine.animation.Animation;
 import engine.entities.Entity;
+import engine.graphics.models.AnimatedModel;
 import engine.graphics.models.Model;
 import engine.graphics.Texture;
 import engine.graphics.shaders.Shader;
@@ -117,6 +124,20 @@ public class Loader {
         return new Model(vaoID, indices.length, modelVBOs);
     }
 
+    public static synchronized AnimatedModel loadToVAO(float[] positions, float[] textureCoordinates, float[] normals, int[] indices,
+                                                       int[] joints, float[] weights) {
+        int vaoID = createVAO();
+        bindIndicesBuffer(indices);
+        List<Integer> modelVBOs = new ArrayList<>();
+        modelVBOs.add(storeDataInAttributeList(0, 3, positions));
+        modelVBOs.add(storeDataInAttributeList(1, 2, textureCoordinates));
+        modelVBOs.add(storeDataInAttributeList(2, 3, normals));
+        modelVBOs.add(storeDataInAttributeList(3, 3, joints));
+        modelVBOs.add(storeDataInAttributeList(4, 3, weights));
+        unbindVAO();
+        return new AnimatedModel(vaoID, indices.length, modelVBOs);
+    }
+
     public static synchronized Model loadToVAO(float[] positions, float[] textureCoordinates) {
         int vaoID = createVAO();
         List<Integer> modelVBOs = new ArrayList<>();
@@ -132,6 +153,27 @@ public class Loader {
         modelVBOs.add(storeDataInAttributeList(0, 2, positions));
         unbindVAO();
         return new Model(vaoID, positions.length / 2, modelVBOs);
+    }
+
+    public static synchronized Animation loadAnimation(String filePath) {
+        File file = new File(Loader.class.getResource(Config.MODEL_LOCATION + filePath).getFile());
+        AnimationData data = ColladaLoader.loadColladaAnimation(file);
+        Animation animation = new Animation(data.lengthSeconds, data.getEngineKeyframes());
+        return animation;
+    }
+
+    public static synchronized AnimatedModel loadAnimatedModel(String file, String texture) {
+        AnimatedModelData dat = ColladaLoader.loadColladaModel(
+                new File(Loader.class.getResource(Config.MODEL_LOCATION + file).getFile()),
+                3);
+        MeshData meshData = dat.getMeshData();
+        AnimatedModel model = loadToVAO(meshData.getVertices(), meshData.getTextureCoords(), meshData.getNormals(),
+                meshData.getIndices(), meshData.getJointIds(), meshData.getVertexWeights());
+        SkeletonData skeletonData = dat.getJointsData();
+        System.out.println(skeletonData.jointCount);
+        model.setJoints(skeletonData.headJoint.toEngineJoint(), skeletonData.jointCount);
+        model.setTexture(loadTexture(texture));
+        return model;
     }
 
     public static synchronized Model loadModel(Entity entity, String objFile, String textureFile) {
@@ -254,6 +296,17 @@ public class Loader {
         FloatBuffer buffer = Utility.floatArrayToBuffer(data);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
         GL20.glVertexAttribPointer(attributeNumber, dimensions, GL11.GL_FLOAT, false, 0, 0);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        return vboID;
+    }
+
+    private static synchronized int storeDataInAttributeList(int attributeNumber, int dimensions, int[] data) {
+        int vboID = GL15.glGenBuffers();
+        vbos.add(vboID);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);
+        IntBuffer buffer = Utility.intArrayToBuffer(data);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+        GL30.glVertexAttribIPointer(attributeNumber, dimensions, GL11.GL_INT, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         return vboID;
     }

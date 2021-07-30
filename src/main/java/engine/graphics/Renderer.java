@@ -1,11 +1,13 @@
 package engine.graphics;
 
 import engine.Camera;
+import engine.graphics.models.AnimatedModel;
 import engine.world.Terrain;
 import engine.world.World;
 import engine.entities.Entity;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -71,13 +73,18 @@ public class Renderer {
      */
     public static void render(Entity entity, Camera camera, List<Light> lights) {
         Model model = entity.getModel();
-        Shader shader = Entity.shader;
+        boolean isAnimated = model instanceof AnimatedModel;
+        Shader shader = isAnimated ? Entity.animatedShader : Entity.shader;
         Material material = entity.getMaterial();
         shader.use();
         GL30.glBindVertexArray(model.getVaoID());
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
+        if (isAnimated) {
+            GL20.glEnableVertexAttribArray(3);
+            GL20.glEnableVertexAttribArray(4);
+        }
         // Matrices to set
         shader.setUniform("transformationMatrix", entity.getMatrix());
         shader.setUniform("projectionMatrix", camera.getProjection());
@@ -95,6 +102,14 @@ public class Renderer {
         shader.setUniform("materialDiffuse", material.getDiffuse());
         // Set camera position for easy access
         shader.setUniform("cameraPosition", camera.getPosition());
+        // If animated, add that too
+        if (isAnimated) {
+            Matrix4f[] transforms = ((AnimatedModel) model).getJointTransforms();
+            for (int i = 0; i < transforms.length; i++) {
+                Matrix4f mat = transforms[i];
+                shader.setUniform("jointTransforms[" + i + "]", mat);
+            }
+        }
         // Bind texture
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getTextureID());
@@ -104,6 +119,10 @@ public class Renderer {
         GL20.glDisableVertexAttribArray(0);
         GL20.glDisableVertexAttribArray(1);
         GL20.glDisableVertexAttribArray(2);
+        if (isAnimated) {
+            GL20.glDisableVertexAttribArray(3);
+            GL20.glDisableVertexAttribArray(4);
+        }
         GL30.glBindVertexArray(0);
         shader.unuse();
     }

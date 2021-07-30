@@ -2,6 +2,7 @@ package engine.entities;
 
 import engine.graphics.Material;
 import engine.graphics.models.Model;
+import engine.graphics.shaders.AnimatedTextureShader;
 import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TextureShader;
 import org.joml.Matrix4f;
@@ -17,6 +18,7 @@ public abstract class Entity {
     protected Vector3f scale;
     protected Vector3f rotation;
     public static Shader shader = new TextureShader();
+    public static Shader animatedShader = new AnimatedTextureShader();
     protected Material material;
     public boolean readyToRender = true;
 

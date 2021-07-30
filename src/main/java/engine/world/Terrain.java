@@ -3,6 +3,7 @@ package engine.world;
 import engine.Loader;
 import engine.entities.Boulder;
 import engine.entities.Entity;
+import engine.entities.Fern;
 import engine.entities.Pine;
 import engine.graphics.Light;
 import engine.graphics.Material;
@@ -35,6 +36,7 @@ public class Terrain {
     private List<Entity> terrainEntities;
     private static final int NUM_TREES = 1000;
     private static final int NUM_ROCKS = 1000;
+    private static final int NUM_FERNS = 100;
 
     private Raster raster;
     private BufferedImage image;
@@ -123,6 +125,21 @@ public class Terrain {
                             new Vector3f(x, sample(x, z) - 0.3f, z),
                             new Vector3f(0.3f * (float) Math.random() + 0.05f),
                             new Vector3f((float) Math.random() * 360f, (float) Math.random() * 360f, (float) Math.random() * 360f)
+                    )
+            );
+        }
+        for (int i = 0; i < NUM_FERNS; i++) {
+            float x = ((float) Math.random() - 0.5f) * getWidth() + position.x;
+            float z = ((float) Math.random() - 0.5f) * getHeight() + position.z;
+            float y = sample(x, z);
+            if (y < waterLevel) {
+                i--; continue;
+            }
+            addTerrainEntity(
+                    new Fern("fern_" + x_offset + "_" + x_offset + "_" + i,
+                            new Vector3f(x, y - 0.3f, z),
+                            new Vector3f(0.1f * (float) Math.random() + 0.02f),
+                            new Vector3f(0, (float) Math.random() * 360f, 0)
                     )
             );
         }

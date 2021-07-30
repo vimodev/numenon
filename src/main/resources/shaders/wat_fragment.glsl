@@ -45,7 +45,7 @@ void main() {
     for (int i = 0; i < numberOfLights; i++) {
         pixel_colour = pixel_colour + attenuation(i) * lighting(i);
     }
-    vec2 texCoord = mod(pass_position.xz / 25, 1);
+    vec2 texCoord = mod(pass_position.xz / 10, 1);
     // Apply texture
     pixel_colour = pixel_colour * texture(textureSampler, texCoord);
 }

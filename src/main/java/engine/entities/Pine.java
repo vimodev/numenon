@@ -15,6 +15,7 @@ public class Pine extends Entity {
         super(name, position, scale, rotation);
         this.model = Loader.loadModel(this,"pine.obj", "pine.png");
         this.material = new Material(new Vector3f(1), new Vector3f(1));
+        this.hasTransparency = true;
     }
 
     @Override

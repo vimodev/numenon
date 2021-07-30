@@ -39,6 +39,9 @@ float attenuation(int light_index) {
 }
 
 void main() {
+    if (texture(textureSampler, pass_textureCoords).a < 0.5) {
+        discard;
+    }
     // Initialize pixel colour to black
     pixel_colour = vec4(0, 0, 0, 1);
     // Apply lighting for all lights

@@ -72,6 +72,7 @@ public class Renderer {
      * @param lights
      */
     public static void render(Entity entity, Camera camera, List<Light> lights) {
+        if (entity.hasTransparency) glDisable(GL_CULL_FACE);
         Model model = entity.getModel();
         boolean isAnimated = model instanceof AnimatedModel;
         Shader shader = isAnimated ? Entity.animatedShader : Entity.shader;
@@ -125,6 +126,7 @@ public class Renderer {
         }
         GL30.glBindVertexArray(0);
         shader.unuse();
+        if (entity.hasTransparency) glEnable(GL_CULL_FACE);
     }
 
     public static void post() {

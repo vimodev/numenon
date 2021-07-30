@@ -21,12 +21,14 @@ public abstract class Entity {
     public static Shader animatedShader = new AnimatedTextureShader();
     protected Material material;
     public boolean readyToRender = true;
+    public boolean hasTransparency;
 
     public Entity(String name, Vector3f position, Vector3f scale, Vector3f rotation) {
         this.name = name;
         this.position = position;
         this.scale = scale;
         this.rotation = rotation;
+        this.hasTransparency = false;
     }
 
     public abstract boolean isColliding(Vector3f checkedPosition);

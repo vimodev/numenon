@@ -92,7 +92,7 @@ public class GenerateNeighbours implements Runnable {
         while (true) {
             // Do some sleeping
             try {
-                Thread.sleep(100);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

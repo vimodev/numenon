@@ -51,9 +51,13 @@ public class Renderer {
                 neighbours[i].render(world);
             }
         }
+        // Also render water
+        world.getWater().render(world);
+        // Render player
         if (world.getPlayer() != null) {
             render(world.getPlayer(), world.getCamera(), world.getLights());
         }
+        // Render entities in range
         for (Entity entity : world.getRenderedEntities()) {
             render(entity, world.getCamera(), world.getLights());
         }

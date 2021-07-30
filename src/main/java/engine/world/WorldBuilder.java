@@ -53,40 +53,10 @@ public class WorldBuilder {
                         "grassFlowers.png",
                         "mud.png",
                         "path.png"),
-                        0, 0
+                        0, 0, -2f
                 );
-        world.setTerrain(terrain);
+        world.setTerrain(terrain, -2f);
         world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 24f), new Vector3f(0)));
-//        for (int i = 0; i < 1000; i++) {
-//            float x = ((float) Math.random() - 0.5f) * world.getTerrain().getWidth();
-//            float z = ((float) Math.random() - 0.5f) * world.getTerrain().getHeight();
-//            world.addEntity(
-//                    new Pine(
-//                            "pine" + i,
-//                            new Vector3f(
-//                                    x,
-//                                    world.getTerrain().sample(x, z) - 0.3f,
-//                                    z
-//                            ),
-//                            new Vector3f(0.2f + (float) Math.random() * 0.2f),
-//                            new Vector3f(0, (float) Math.random() * 360f, 0)
-//                    )
-//            );
-//            x = ((float) Math.random() - 0.5f) * world.getTerrain().getWidth();
-//            z = ((float) Math.random() - 0.5f) * world.getTerrain().getHeight();
-//            world.addEntity(
-//                    new Boulder(
-//                            "boulder" + i,
-//                            new Vector3f(
-//                                    x,
-//                                    world.getTerrain().sample(x, z),
-//                                    z
-//                            ),
-//                            new Vector3f(0.3f * (float) Math.random() + 0.05f),
-//                            new Vector3f((float) Math.random() * 360f, (float) Math.random() * 360f, (float) Math.random() * 360f)
-//                    )
-//            );
-//        }
         return world;
     }
 

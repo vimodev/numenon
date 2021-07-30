@@ -51,6 +51,8 @@ public class Terrain {
     private int resolution;
     private float yScale;
 
+    private float waterLevel;
+
     private static Shader shader = new TerrainShader();
     private Model model;
     public boolean readyToRender = true;
@@ -62,7 +64,8 @@ public class Terrain {
     private TexturePack texturePack;
 
     public Terrain(String heightMap, float width, float height, float yScale, int resolution, Vector3f position, TexturePack texturePack,
-                   int x_offset, int z_offset) {
+                   int x_offset, int z_offset, float waterLevel) {
+        this.waterLevel = waterLevel;
         this.texturePack = texturePack;
         this.width = width;
         this.height = height;
@@ -100,9 +103,13 @@ public class Terrain {
         for (int i = 0; i < NUM_TREES; i++) {
             float x = ((float) Math.random() - 0.5f) * getWidth() + position.x;
             float z = ((float) Math.random() - 0.5f) * getHeight() + position.z;
+            float y = sample(x, z);
+            if (y < waterLevel) {
+                i--; continue;
+            }
             addTerrainEntity(
                     new Pine("pine_" + x_offset + "_" + x_offset + "_" + i,
-                        new Vector3f(x, sample(x, z) - 0.3f, z),
+                        new Vector3f(x, y - 0.3f, z),
                         new Vector3f(0.2f + (float) Math.random() * 0.2f),
                         new Vector3f(0, (float) Math.random() * 360f, 0)
                     )

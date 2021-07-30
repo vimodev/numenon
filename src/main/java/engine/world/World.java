@@ -20,6 +20,7 @@ public class World {
 
     protected Terrain terrain;
     protected Terrain[] neighbours;
+    protected Water water;
 
     protected List<Entity> renderedEntities;
     protected List<Entity> collisionCheckedEntities;
@@ -89,6 +90,10 @@ public class World {
         Renderer.render(this);
     }
 
+    public Water getWater() {
+        return water;
+    }
+
     public Player getPlayer() {
         return player;
     }
@@ -97,15 +102,17 @@ public class World {
         this.player = player;
     }
 
-    public void setTerrain(Terrain terrain) {
+    public void setTerrain(Terrain terrain, float waterLevel) {
         this.terrain = terrain;
         this.neighbours = new Terrain[8];
+        this.water = new Water(waterLevel, terrain.getWidth() * 3, terrain.getHeight() * 3, terrain.getResolution());
         this.neighbourGenerator = new Thread(new GenerateNeighbours(this));
         this.neighbourGenerator.start();
     }
 
     public void setNewCenter(Terrain center) {
         this.terrain = center;
+        this.water.updatePosition(this);
     }
 
     public Terrain getTerrain() {

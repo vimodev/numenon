@@ -86,7 +86,7 @@ public class GenerateNeighbours implements Runnable {
             // Add the neighbour
             world.neighbours[i] = new Terrain("", original.getWidth(), original.getHeight(),
                     original.getyScale(), original.getResolution(), original.getPosition().add(translation, new Vector3f()),
-                    original.getTexturePack(), offset.x, offset.y);
+                    original.getTexturePack(), offset.x, offset.y, world.getWater().getLevel());
         }
         // Loop indefinitely
         while (true) {
@@ -155,7 +155,7 @@ public class GenerateNeighbours implements Runnable {
                         );
                         arr[i] = new Terrain("", original.getWidth(), original.getHeight(),
                                 original.getyScale(), original.getResolution(), center.getPosition().add(translation, new Vector3f()),
-                                original.getTexturePack(), offset.x, offset.y);
+                                original.getTexturePack(), offset.x, offset.y, world.getWater().getLevel());
                     }
                 }
             }

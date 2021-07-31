@@ -22,6 +22,16 @@ public class WorldBuilder {
 
             @Override
             public void tick(double dt) {
+                if (InputController.keyPressed(GLFW_KEY_F9)) {
+                    float x = (float) Math.random() * 10000f;
+                    float z = (float) Math.random() * 10000f;
+                    System.out.println("Teleported to (" + x + ", " + z + ")");
+                    getPlayer().setPosition(new Vector3f(
+                            x,
+                            Math.max(terrain.getWaterLevel(), terrain.sample(x, z)),
+                            z
+                    ));
+                }
                 if (InputController.keyPressed(GLFW_KEY_F11)) {
                     freeCam = !freeCam;
                 }

@@ -213,15 +213,11 @@ public class Terrain {
 
     /**
      * Given world coordinates x and z, get the terrain height
-     * defaults to 0 if out of bounds
      * @param x
      * @param z
      * @return
      */
     public float sample(float x, float z) {
-        if (Math.abs(x - position.x) > Math.abs(width / 2) || Math.abs(z - position.z) > Math.abs(height / 2)) {
-            return 0;
-        }
         x -= position.x; z -= position.z;
         x += width / 2; z += height / 2;
         float squareSizeX = width / (resolution - 1);
@@ -231,10 +227,26 @@ public class Terrain {
         float xC = (x % squareSizeX) / squareSizeX;
         float zC = (z % squareSizeZ) / squareSizeZ;
         if (xC <= 1 - zC) {
+            // If out of bounds we try to sample any way
+            if (Math.abs(x - position.x) > Math.abs(width / 2) || Math.abs(z - position.z) > Math.abs(height / 2)) {
+                return Utility.barryCentric(
+                        new Vector3f(0, getRandomHeight(gridX, gridZ), 0),
+                        new Vector3f(1, getRandomHeight(gridX + 1, gridZ), 0),
+                        new Vector3f(0, getRandomHeight(gridX, gridZ + 1), 1),
+                        new Vector2f(xC, zC));
+            }
             return Utility.barryCentric(new Vector3f(0, heights[gridX][gridZ], 0), new Vector3f(1,
                     heights[gridX + 1][gridZ], 0), new Vector3f(0,
                     heights[gridX][gridZ + 1], 1), new Vector2f(xC, zC));
         } else {
+            // If out of bounds we try to sample any way
+            if (Math.abs(x - position.x) > Math.abs(width / 2) || Math.abs(z - position.z) > Math.abs(height / 2)) {
+                return Utility.barryCentric(
+                        new Vector3f(1, getRandomHeight(gridX + 1, gridZ), 0),
+                        new Vector3f(1, getRandomHeight(gridX + 1, gridZ + 1), 1),
+                        new Vector3f(0, getRandomHeight(gridX, gridZ + 1), 1),
+                        new Vector2f(xC, zC));
+            }
             return Utility.barryCentric(new Vector3f(1, heights[gridX + 1][gridZ], 0), new Vector3f(1,
                     heights[gridX + 1][gridZ + 1], 1), new Vector3f(0,
                     heights[gridX][gridZ + 1], 1), new Vector2f(xC, zC));

@@ -11,11 +11,21 @@ public class GUIElement {
     private Texture texture;
     private Vector2f position;
     private Vector2f scale;
+    private String name;
 
-    public GUIElement(String texture, Vector2f position, Vector2f scale) {
+    public GUIElement(String name, String texture, Vector2f position, Vector2f scale) {
         this.texture = Loader.loadTexture(texture);
         this.position = position;
         this.scale = scale;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Matrix4f getMatrix() { return Utility.createTransformationMatrix(position, scale); }

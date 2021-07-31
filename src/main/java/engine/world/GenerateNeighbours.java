@@ -2,6 +2,7 @@ package engine.world;
 
 import engine.Camera;
 import engine.Loader;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL;
@@ -101,18 +102,29 @@ public class GenerateNeighbours implements Runnable {
             Terrain center = world.getTerrain();
             Vector3f tpos = center.getPosition();
             Terrain[] arr = world.getNeighbours();
-            // If player is out of bounds of center map, start moving around stuff and generating
-            if (Math.abs(cpos.x - tpos.x) > Math.abs(center.getWidth() / 2) ||
-                    Math.abs(cpos.z - tpos.z) > Math.abs(center.getHeight() / 2)) {
-                // Determine player offset
-                int x_offset = 0;
-                int z_offset = 0;
-                if (cpos.x - tpos.x > center.getWidth() / 2) x_offset = 1;
-                if (cpos.x - tpos.x < -center.getWidth() / 2) x_offset = -1;
-                if (cpos.z - tpos.z > center.getHeight() / 2) z_offset = -1;
-                if (cpos.z - tpos.z < -center.getHeight() / 2) z_offset = 1;
-                if (x_offset == 0 && z_offset == 0) continue;
-                int index = indexFromRelativeOffset(new Vector2i(x_offset, z_offset));
+            // Determine player offset
+            Vector2f off = new Vector2f(cpos.x - tpos.x, cpos.z - tpos.z);
+            off.add(center.getWidth() / 2f, center.getHeight() / 2f);
+            off.div(center.getWidth(), center.getHeight());
+            off.floor();
+            int x_offset = (int) off.x;
+            int z_offset = (int) off.y;
+            // If we somehow arent even near our previous center (x_offset >> 1 or z_offset >> 1)
+            // We just ditch everything and calculate a new center
+            if (Math.abs(x_offset) > 1 || Math.abs(z_offset) > 1) {
+                Vector2i offset = center.getOffsets().add(x_offset, z_offset, new Vector2i());
+                Vector3f translation = new Vector3f(
+                        x_offset * center.getWidth(),
+                        center.getPosition().y,
+                        z_offset * center.getHeight()
+                );
+                Terrain newCenter = new Terrain(original.getWidth(), original.getHeight(),
+                        original.getyScale(), original.getResolution(), center.getPosition().add(translation, new Vector3f()),
+                        original.getTexturePack(), offset.x, offset.y, world.getWater().getLevel());
+                Loader.addToTerrainDestroyQueue(new Terrain[]{arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6], arr[7], center});
+                for (int i = 0; i < 8; i++) arr[i] = null;
+                center = newCenter;
+            } else {
                 /**
                  * 0 1 2
                  * 3 c 4
@@ -131,32 +143,32 @@ public class GenerateNeighbours implements Runnable {
                     arr[7] = arr[6]; arr[6] = arr[5]; arr[5] = null;
                 }
                 // Move stuff down
-                if (z_offset == 1) {
+                if (z_offset == -1) {
                     Loader.addToTerrainDestroyQueue(new Terrain[]{arr[5], arr[6], arr[7]});
                     arr[5] = arr[3]; arr[3] = arr[0]; arr[0] = null;
                     arr[6] = center; center = arr[1]; arr[1] = null;
                     arr[7] = arr[4]; arr[4] = arr[2]; arr[2] = null;
-                } else if (z_offset == -1) { // Move stuff up
+                } else if (z_offset == 1) { // Move stuff up
                     Loader.addToTerrainDestroyQueue(new Terrain[]{arr[0], arr[1], arr[2]});
                     arr[0] = arr[3]; arr[3] = arr[5]; arr[5] = null;
                     arr[1] = center; center = arr[6]; arr[6] = null;
                     arr[2] = arr[4]; arr[4] = arr[7]; arr[7] = null;
                 }
-                //. Update the new center
-                world.setNewCenter(center);
-                // Now generate the missing pieces
-                for (int i = 0; i < 8; i++) {
-                    if (arr[i] == null) {
-                        Vector2i offset = offsetFromIndex(i);
-                        Vector3f translation = new Vector3f(
-                                relativeOffsetFromIndex(i).x * center.getWidth(),
-                                center.getPosition().y,
-                                relativeOffsetFromIndex(i).y * center.getHeight()
-                        );
-                        arr[i] = new Terrain(original.getWidth(), original.getHeight(),
-                                original.getyScale(), original.getResolution(), center.getPosition().add(translation, new Vector3f()),
-                                original.getTexturePack(), offset.x, offset.y, world.getWater().getLevel());
-                    }
+            }
+            // Update the new center
+            world.setNewCenter(center);
+            // Now generate the missing pieces
+            for (int i = 0; i < 8; i++) {
+                if (arr[i] == null) {
+                    Vector2i offset = offsetFromIndex(i);
+                    Vector3f translation = new Vector3f(
+                            relativeOffsetFromIndex(i).x * center.getWidth(),
+                            center.getPosition().y,
+                            relativeOffsetFromIndex(i).y * center.getHeight()
+                    );
+                    arr[i] = new Terrain(original.getWidth(), original.getHeight(),
+                            original.getyScale(), original.getResolution(), center.getPosition().add(translation, new Vector3f()),
+                            original.getTexturePack(), offset.x, offset.y, world.getWater().getLevel());
                 }
             }
         }

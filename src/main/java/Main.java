@@ -6,6 +6,8 @@ import engine.gui.fonts.fontMeshCreator.FontType;
 import engine.gui.fonts.fontMeshCreator.GUIText;
 import engine.world.World;
 import engine.world.WorldBuilder;
+import game.InputController;
+import game.Inventory;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -76,6 +78,7 @@ public class Main {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         // Initialize frame timer
         frameTimer = new Timer();
+        InputController.initialize();
     }
 
     /**
@@ -83,21 +86,26 @@ public class Main {
      */
     public void loop() {
         World world = WorldBuilder.testWorld1();
-        //GUI.addElement(new GUIElement("mylogo.png", new Vector2f(-0.85f, -0.85f), new Vector2f(0.15f)));
+        //GUI.addElement(Inventory.getGuiElement());
 
         FontType font = new FontType(Loader.loadTexture("verdana.png").getTextureID(), Loader.loadFontFile("verdana.fnt"));
         GUIText text = new GUIText("fps","0", 1, font, new Vector2f(0f), 1f, false);
         text.setColour(1, 1, 1);
 
+        boolean wireframeMode = false;
+
         double dt = 0; double accum = 0;
         while ( !glfwWindowShouldClose(window.getWindow()) ) {
             dt = frameTimer.dt();
 
-            if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_F10) == 1) {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            }
-            if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_F11) == 1) {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            if (InputController.keyPressed(GLFW_KEY_F10)) {
+                if (wireframeMode) {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    wireframeMode = false;
+                } else {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                    wireframeMode = true;
+                }
             }
 
             world.tick(dt);

@@ -47,7 +47,8 @@ public class Renderer {
     public static void render(World world) {
         Renderer.pre();
         world.updateLists();
-        world.getTerrain().render(world);
+        // Only if terrain is ready to render do we do so
+        if (world.getTerrain().readyToRender) world.getTerrain().render(world);
         // Also render neighbouring terrains
         Terrain[] neighbours = world.getNeighbours();
         for (int i = 0; i < 8; i++) {

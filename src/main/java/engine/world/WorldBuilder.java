@@ -5,6 +5,7 @@ import engine.entities.Boulder;
 import engine.entities.Pine;
 import engine.entities.Player;
 import engine.graphics.Light;
+import game.InputController;
 import org.joml.Vector3f;
 import utility.Global;
 import utility.Timer;
@@ -21,10 +22,8 @@ public class WorldBuilder {
 
             @Override
             public void tick(double dt) {
-                if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_F9) == 1) {
-                    freeCam = true;
-                } else if (glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_F8) == 1) {
-                    freeCam = false;
+                if (InputController.keyPressed(GLFW_KEY_F11)) {
+                    freeCam = !freeCam;
                 }
                 if (freeCam) {
                     this.getCamera().terrainBoundMove(terrain, dt);

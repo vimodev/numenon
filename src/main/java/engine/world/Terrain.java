@@ -53,7 +53,7 @@ public class Terrain {
 
     private static Shader shader = new TerrainShader();
     private Model model;
-    public boolean readyToRender = true;
+    public boolean readyToRender = false;
 
     private Vector3f position;
 
@@ -228,7 +228,7 @@ public class Terrain {
         float zC = (z % squareSizeZ) / squareSizeZ;
         if (xC <= 1 - zC) {
             // If out of bounds we try to sample any way
-            if (Math.abs(x - position.x) > Math.abs(width / 2) || Math.abs(z - position.z) > Math.abs(height / 2)) {
+            if (Math.abs(x - position.x) >= Math.abs((width / 2) - 2f) || Math.abs(z - position.z) >= Math.abs((height / 2) - 2f)) {
                 return Utility.barryCentric(
                         new Vector3f(0, getRandomHeight(gridX, gridZ), 0),
                         new Vector3f(1, getRandomHeight(gridX + 1, gridZ), 0),
@@ -240,7 +240,7 @@ public class Terrain {
                     heights[gridX][gridZ + 1], 1), new Vector2f(xC, zC));
         } else {
             // If out of bounds we try to sample any way
-            if (Math.abs(x - position.x) > Math.abs(width / 2) || Math.abs(z - position.z) > Math.abs(height / 2)) {
+            if (Math.abs(x - position.x) >= Math.abs((width / 2) - 2f) || Math.abs(z - position.z) >= Math.abs((height / 2) - 2f)) {
                 return Utility.barryCentric(
                         new Vector3f(1, getRandomHeight(gridX + 1, gridZ), 0),
                         new Vector3f(1, getRandomHeight(gridX + 1, gridZ + 1), 1),
@@ -306,6 +306,7 @@ public class Terrain {
         // Only main thread can do this so we check if this is main thread
         if (Thread.currentThread().getName().equals("main")) {
             this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
+            readyToRender = true;
         } else {
             // If not the main thread, we add the data to a Loader queue so that main thread can load it later
             Global.terrain_queue_mutex.lock();

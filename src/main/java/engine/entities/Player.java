@@ -10,6 +10,7 @@ import engine.graphics.shaders.TextureShader;
 import engine.world.Terrain;
 import engine.world.Water;
 import engine.world.World;
+import game.InputController;
 import org.joml.Vector3f;
 import utility.Config;
 import utility.Global;
@@ -133,13 +134,13 @@ public class Player extends Entity {
     private void applyMovement(double dt) {
         boolean cooldown = (collisionTimer.readDt() <= Config.ENTITY_COLLISION_TIMEOUT);
         Vector3f direction = getDirection();
-        float mv_scl_forward = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_W) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_S);
+        float mv_scl_forward = InputController.keyHeldInt(GLFW_KEY_W) - InputController.keyHeldInt(GLFW_KEY_S);
         if (mv_scl_forward != 0 && !cooldown) {
             direction.mul(Config.PLAYER_MOVE_SPEED * mv_scl_forward);
             direction.y = velocity.y;
             velocity.set(direction);
         }
-        float turn_scl = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_A) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_D);
+        float turn_scl = InputController.keyHeldInt(GLFW_KEY_A) - InputController.keyHeldInt(GLFW_KEY_D);
         rotate(new Vector3f(0, turn_scl * Config.PLAYER_TURN_SPEED * (float) dt, 0));
     }
 
@@ -149,7 +150,7 @@ public class Player extends Entity {
      */
     private void applyJump(Terrain terrain) {
         float y = terrain.sample(position.x, position.z);
-        if (position.y <= y && glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_SPACE) == 1) {
+        if (position.y <= y && InputController.keyPressed(GLFW_KEY_SPACE)) {
             velocity.y += Config.PLAYER_JUMP_SPEED;
         }
     }

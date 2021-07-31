@@ -2,6 +2,7 @@ package engine;
 
 import engine.entities.Player;
 import engine.world.Terrain;
+import game.InputController;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -94,7 +95,7 @@ public class Camera {
      */
     public void freeMove(double dt) {
         // Mouse looking
-        if (!mouseLocked && glfwGetMouseButton(Global.WINDOW_IDENTIFIER, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
+        if (!mouseLocked && InputController.primaryMouseButtonHeld()) {
             glfwSetCursorPos(Global.WINDOW_IDENTIFIER, mouseCenterX, mouseCenterY);
             mouseLocked = true;
         } else if (mouseLocked) {
@@ -113,11 +114,11 @@ public class Camera {
             yaw((float) deltaX * Config.CAMERA_MOUSE_SENS);
             pitch = Math.max(pitch, -90f); pitch = Math.min(pitch, 90f);
         }
-        if (glfwGetMouseButton(Global.WINDOW_IDENTIFIER, GLFW_MOUSE_BUTTON_1) != GLFW_PRESS) {
+        if (!InputController.primaryMouseButtonHeld()) {
             mouseLocked = false;
         }
         // Keyboard movement
-        float mv_scl_forward = glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_W) - glfwGetKey(Global.WINDOW_IDENTIFIER, GLFW_KEY_S);
+        float mv_scl_forward = InputController.keyHeldInt(GLFW_KEY_W) - InputController.keyHeldInt(GLFW_KEY_S);
         Vector3f direction = getDirection();
         translate(direction.mul(mv_scl_forward * Config.CAMERA_MOVE_SPEED * (float) dt));
     }

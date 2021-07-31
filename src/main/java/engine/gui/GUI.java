@@ -29,6 +29,19 @@ public class GUI {
         elements.add(element);
     }
 
+    public static void removeElement(GUIElement element) {
+        elements.remove(element);
+    }
+
+    public static void removeElementByName(String name) {
+        for (GUIElement element : elements) {
+            if (element.getName().equals(name)) {
+                removeElement(element);
+                return;
+            }
+        }
+    }
+
     public static Map<FontType, List<GUIText>> getTexts() {
         return texts;
     }

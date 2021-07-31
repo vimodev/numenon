@@ -146,7 +146,7 @@ public class Terrain {
             }
             addTerrainEntity(
                     new Crocus("crocus_" + x_offset + "_" + x_offset + "_" + i,
-                            new Vector3f(x, y - 0.3f, z),
+                            new Vector3f(x, y, z),
                             new Vector3f(0.75f + 1 * (float) Math.random()),
                             new Vector3f(0, (float) Math.random() * 360f, 0)
                     )

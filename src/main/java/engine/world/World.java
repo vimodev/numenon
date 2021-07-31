@@ -5,10 +5,13 @@ import engine.entities.Player;
 import engine.graphics.Light;
 import engine.entities.Entity;
 import engine.graphics.Renderer;
+import engine.graphics.models.Model;
 import utility.Config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class World {
 
@@ -22,14 +25,14 @@ public class World {
     protected Terrain[] neighbours;
     protected Water water;
 
-    protected List<Entity> renderedEntities;
+    protected Map<Model, List<Entity>> renderedEntitiesMap;
     protected List<Entity> collisionCheckedEntities;
     protected Thread neighbourGenerator;
 
     public World(String name) {
         entities = new ArrayList<>();
         lights = new ArrayList<>();
-        renderedEntities = new ArrayList<>();
+        renderedEntitiesMap = new HashMap<>();
         collisionCheckedEntities = new ArrayList<>();
         this.neighbours = new Terrain[8];
         this.name = name;
@@ -38,8 +41,8 @@ public class World {
     public World(String name, Terrain terrain, Player player) {
         entities = new ArrayList<>();
         lights = new ArrayList<>();
-        renderedEntities = new ArrayList<>();
         collisionCheckedEntities = new ArrayList<>();
+        renderedEntitiesMap = new HashMap<>();
         this.name = name;
         this.player = player;
         this.terrain = terrain;
@@ -50,8 +53,8 @@ public class World {
 
     public void updateLists() {
         // Update rendered entities based on view distance
-        renderedEntities.clear();
         collisionCheckedEntities.clear();
+        renderedEntitiesMap.clear();
         for (Entity entity : entities) {
             updateListsEntity(entity);
         }
@@ -70,7 +73,11 @@ public class World {
     public void updateListsEntity(Entity entity) {
         float distance = entity.getPosition().distance(camera.getPosition());
         if (distance <= Config.ENTITY_VIEW_DISTANCE) {
-            renderedEntities.add(entity);
+            Model model = entity.getModel();
+            if (!renderedEntitiesMap.containsKey(model)) {
+                renderedEntitiesMap.put(model, new ArrayList<>());
+            }
+            renderedEntitiesMap.get(model).add(entity);
             // Render distance always >>>> collision distance so check that only when rendered
             if (distance <= Config.ENTITY_COLLISION_CHECK_RADIUS) {
                 collisionCheckedEntities.add(entity);
@@ -78,8 +85,8 @@ public class World {
         }
     }
 
-    public List<Entity> getRenderedEntities() {
-        return renderedEntities;
+    public Map<Model, List<Entity>> getRenderedEntitiesMap() {
+        return renderedEntitiesMap;
     }
 
     public List<Entity> getCollisionCheckedEntities() {

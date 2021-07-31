@@ -18,7 +18,7 @@ public class Config {
     public static float CAMERA_MOVE_SPEED = 100f;
     public static float CAMERA_MOUSE_SENS = 0.2f;
 
-    public static final float ENTITY_VIEW_DISTANCE = 75f;
+    public static final float ENTITY_VIEW_DISTANCE = 125f;
     public static final float ENTITY_COLLISION_CHECK_RADIUS = 10f;
     public static final float ENTITY_COLLISION_BOUNCEBACK = 3f;
     public static final float ENTITY_COLLISION_TIMEOUT = 0.5f;

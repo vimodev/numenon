@@ -57,7 +57,12 @@ public class WorldBuilder {
                         0, 0, -4f
                 );
         world.setTerrain(terrain);
-        world.setPlayer(new Player("player", new Vector3f(0, 5, 0), new Vector3f(1f / 9f), new Vector3f(0)));
+        world.setPlayer(
+                new Player("player",
+                new Vector3f(0, Math.max(terrain.getWaterLevel(), terrain.sample(0, 0)), 0),
+                new Vector3f(1f / 9f),
+                new Vector3f(0))
+        );
         return world;
     }
 

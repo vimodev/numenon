@@ -35,7 +35,7 @@ public class Terrain {
 
     private List<Entity> terrainEntities;
     private static final int NUM_TREES = 250;
-    private static final int NUM_ROCKS = 250;
+    private static final int NUM_ROCKS = 125;
     private static final int NUM_FERNS = 25;
 
     private Raster raster;
@@ -114,7 +114,7 @@ public class Terrain {
             float x = ((float) Math.random() - 0.5f) * getWidth() + position.x;
             float z = ((float) Math.random() - 0.5f) * getHeight() + position.z;
             float y = sample(x, z);
-            if (y < waterLevel) {
+            if (y < waterLevel || getRoughNormal(x, z).y <= 0.5) {
                 i--; continue;
             }
             addTerrainEntity(
@@ -487,6 +487,10 @@ public class Terrain {
         Vector3f normal = new Vector3f(heightL-heightR, 2f, heightD - heightU);
         normal.normalize();
         return normal;
+    }
+
+    public Vector3f getRoughNormal(float x, float z) {
+        return calculateRandomNormal(Math.round(x), Math.round(z));
     }
 
     public float getWidth() {

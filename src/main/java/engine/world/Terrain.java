@@ -1,10 +1,7 @@
 package engine.world;
 
 import engine.Loader;
-import engine.entities.Boulder;
-import engine.entities.Entity;
-import engine.entities.Fern;
-import engine.entities.Pine;
+import engine.entities.*;
 import engine.graphics.Light;
 import engine.graphics.Material;
 import engine.graphics.Renderer;
@@ -18,14 +15,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import utility.Config;
 import utility.Global;
-import utility.Timer;
 import utility.Utility;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +29,9 @@ public class Terrain {
     private List<Entity> terrainEntities;
     private static final int NUM_TREES = 250;
     private static final int NUM_ROCKS = 125;
-    private static final int NUM_FERNS = 25;
+    private static final int NUM_FERNS = 75;
+    private static final int NUM_DAFFODILS = 75;
+    private static final int NUM_CROCUS = 75;
 
     private float[][] heights;
 
@@ -124,6 +118,36 @@ public class Terrain {
                     new Fern("fern_" + x_offset + "_" + x_offset + "_" + i,
                             new Vector3f(x, y - 0.3f, z),
                             new Vector3f(0.1f * (float) Math.random() + 0.02f),
+                            new Vector3f(0, (float) Math.random() * 360f, 0)
+                    )
+            );
+        }
+        for (int i = 0; i < NUM_DAFFODILS; i++) {
+            float x = ((float) Math.random() - 0.5f) * getWidth() + position.x;
+            float z = ((float) Math.random() - 0.5f) * getHeight() + position.z;
+            float y = sample(x, z);
+            if (y < waterLevel) {
+                i--; continue;
+            }
+            addTerrainEntity(
+                    new Daffodil("daffodil_" + x_offset + "_" + x_offset + "_" + i,
+                            new Vector3f(x, y - 0.3f, z),
+                            new Vector3f(2f + 1 * (float) Math.random()),
+                            new Vector3f(0, (float) Math.random() * 360f, 0)
+                    )
+            );
+        }
+        for (int i = 0; i < NUM_CROCUS; i++) {
+            float x = ((float) Math.random() - 0.5f) * getWidth() + position.x;
+            float z = ((float) Math.random() - 0.5f) * getHeight() + position.z;
+            float y = sample(x, z);
+            if (y < waterLevel) {
+                i--; continue;
+            }
+            addTerrainEntity(
+                    new Crocus("crocus_" + x_offset + "_" + x_offset + "_" + i,
+                            new Vector3f(x, y - 0.3f, z),
+                            new Vector3f(0.75f + 1 * (float) Math.random()),
                             new Vector3f(0, (float) Math.random() * 360f, 0)
                     )
             );

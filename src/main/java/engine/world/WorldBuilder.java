@@ -39,8 +39,8 @@ public class WorldBuilder {
                     this.getCamera().terrainBoundMove(terrain, dt);
                 } else {
                     getPlayer().update(dt, this);
-                    camera.follow(getPlayer(), terrain,2.5f, 1.75f);
-                    camera.lookAt(getPlayer().getPosition().add(0, 1.35f, 0, new Vector3f()));
+                    camera.follow(getPlayer(), terrain,5f, 3.5f);
+                    camera.lookAt(getPlayer().getPosition().add(0, 2.15f, 0, new Vector3f()));
                     getLightByName("sun").setPosition(new Vector3f(-500f, 500, 0).add(getPlayer().getPosition()));
                 }
                 accum += dt;

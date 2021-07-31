@@ -25,6 +25,8 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class Renderer {
 
+    public static Vector3f skyColour = new Vector3f(0, 0.6f, 1f);
+
     /**
      * Stuff that has to happen at start of every frame
      */
@@ -34,7 +36,7 @@ public class Renderer {
         glEnable(GL_CULL_FACE);
         GL11.glEnable(GL11.GL_BLEND);
         glCullFace(GL_BACK);
-        GL11.glClearColor(0f, 0.6f, 1f, 1);
+        GL11.glClearColor(skyColour.x, skyColour.y, skyColour.z, 1);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
@@ -61,9 +63,6 @@ public class Renderer {
             render(world.getPlayer(), world.getCamera(), world.getLights());
         }
         // Render entities in range
-//        for (Entity entity : world.getRenderedEntities()) {
-//            render(entity, world.getCamera(), world.getLights());
-//        }
         Map<Model, List<Entity>> map = world.getRenderedEntitiesMap();
         for (Model model : map.keySet()) {
             renderSameModelEntities(model, map.get(model), world.getCamera(), world.getLights());
@@ -91,6 +90,7 @@ public class Renderer {
             GL20.glEnableVertexAttribArray(4);
         }
         // THESE UNIFORMS DONT CHANGE DEPENDING ON ENTITY
+        shader.setUniform("skyColour", skyColour);
         // Matrices to set
         shader.setUniform("projectionMatrix", camera.getProjection());
         shader.setUniform("viewMatrix", camera.getTransformation());
@@ -160,6 +160,7 @@ public class Renderer {
             GL20.glEnableVertexAttribArray(3);
             GL20.glEnableVertexAttribArray(4);
         }
+        shader.setUniform("skyColour", skyColour);
         // Matrices to set
         shader.setUniform("transformationMatrix", entity.getMatrix());
         shader.setUniform("projectionMatrix", camera.getProjection());

@@ -45,7 +45,6 @@ public class WorldBuilder {
         world.addLight(new Light("sun", new Vector3f(-500f, 500, 0), new Vector3f(0f), new Vector3f(1f)));
         Terrain terrain =
                 new Terrain(
-                    "",
                     250, 250, 25, 215,
                     new Vector3f(0),
                     new TexturePack(

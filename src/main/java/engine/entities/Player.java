@@ -62,7 +62,7 @@ public class Player extends Entity {
         applyMovement(dt);
         applyVelocity(dt);
         applyMovementFriction(dt, terrain, world.getWater());
-        checkTerrainCollision(terrain);
+        checkTerrainCollision(terrain, dt);
         if(!checkEntityCollision(world.getCollisionCheckedEntities())) {
             previousPosition = new Vector3f(position.x, position.y, position.z);
         }
@@ -178,7 +178,7 @@ public class Player extends Entity {
      * if so, y-velocity set to 0
      * @param terrain
      */
-    private void checkTerrainCollision(Terrain terrain) {
+    private void checkTerrainCollision(Terrain terrain, double dt) {
         float y = terrain.sample(position.x, position.z);
         if (position.y < y) {
             position.y = y;

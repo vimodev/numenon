@@ -170,7 +170,6 @@ public class Loader {
         AnimatedModel model = loadToVAO(meshData.getVertices(), meshData.getTextureCoords(), meshData.getNormals(),
                 meshData.getIndices(), meshData.getJointIds(), meshData.getVertexWeights());
         SkeletonData skeletonData = dat.getJointsData();
-        System.out.println(skeletonData.jointCount);
         model.setJoints(skeletonData.headJoint.toEngineJoint(), skeletonData.jointCount);
         model.setTexture(loadTexture(texture));
         return model;

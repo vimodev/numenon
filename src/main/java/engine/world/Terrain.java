@@ -7,6 +7,7 @@ import engine.entities.Fern;
 import engine.entities.Pine;
 import engine.graphics.Light;
 import engine.graphics.Material;
+import engine.graphics.Renderer;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.TerrainShader;
@@ -38,12 +39,7 @@ public class Terrain {
     private static final int NUM_ROCKS = 125;
     private static final int NUM_FERNS = 25;
 
-    private Raster raster;
-    private BufferedImage image;
     private float[][] heights;
-
-    private String heightMap;
-    private boolean randomlyGenerated = false;
 
     public int x_offset = 0;
     public int z_offset = 0;
@@ -65,39 +61,20 @@ public class Terrain {
 
     private TexturePack texturePack;
 
-    public Terrain(String heightMap, float width, float height, float yScale, int resolution, Vector3f position, TexturePack texturePack,
+    public Terrain(float width, float height, float yScale, int resolution, Vector3f position, TexturePack texturePack,
                    int x_offset, int z_offset, float waterLevel) {
         this.waterLevel = waterLevel;
         this.texturePack = texturePack;
         this.width = width;
         this.height = height;
         this.yScale = yScale;
-        this.heightMap = heightMap;
         this.position = position;
         this.resolution = resolution;
         this.x_offset = x_offset;
         this.z_offset = z_offset;
         this.terrainEntities = new ArrayList<>();
-        // If no height map specified, we randomly generate
-        if (heightMap == "" || heightMap == null) {
-            randomlyGenerated = true;
-            generateModelFromRandom();
-            populate();
-            return;
-        }
-        // Read the height map
-        try {
-            BufferedImage i = ImageIO.read(
-                    this.getClass().getResource(Config.HEIGHTMAP_LOCATION + heightMap)
-            );
-            this.image = i;
-            this.raster = i.getData();
-        } catch (Exception e) {
-            System.err.println("Could not read height map.");
-            e.printStackTrace();
-        }
-        // Generate the model from the heightmap
-        generateModelFromRaster();
+        generateModelFromRandom();
+        populate();
     }
 
     public float getWaterLevel() {
@@ -187,6 +164,7 @@ public class Terrain {
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
+        shader.setUniform("skyColour", Renderer.skyColour);
         // Matrices to set
         shader.setUniform("transformationMatrix", Utility.createTransformationMatrix(this.position, new Vector3f(0), new Vector3f(1)));
         shader.setUniform("projectionMatrix", world.getCamera().getProjection());
@@ -263,139 +241,10 @@ public class Terrain {
         }
     }
 
-    /**
-     * Sample the model-space y-coordinate given model-space x and z from the heightmap.
-     * Primarily used for constructing the model
-     * @param x
-     * @param z
-     * @return
-     */
-    private float sampleModelFromHeightmap(float x, float z) {
-        // Find real location
-        float rasterX = ((x + this.width / 2) / this.width) * (raster.getWidth() - 1);
-        float rasterZ = ((z + this.height / 2) / this.height) * (raster.getHeight() - 1);
-        // Get nearest integral locations
-        int floorX = (int) Math.floor(rasterX); int ceilX = (int) Math.ceil(rasterX);
-        int floorZ = (int) Math.floor(rasterZ); int ceilZ = (int) Math.ceil(rasterZ);
-        // Handle exact points
-        if (floorX == ceilX) {
-            if (ceilX < raster.getWidth() - 1) {
-                ceilX++;
-            } else {
-                floorX--;
-            }
-        }
-        if (floorZ == ceilZ) {
-            if (ceilZ < raster.getHeight() - 1) {
-                ceilZ++;
-            } else {
-                floorZ--;
-            }
-        }
-        // Fetch these locations from the heightmap
-        float value = 0;
-        value = (image.getRGB(floorX, floorZ) >> 16) & 0xff;
-        float y1 = (value / 255f) * yScale;
-        value = (image.getRGB(floorX, ceilZ) >> 16) & 0xff;
-        float y2 = (value / 255f) * yScale;
-        value = (image.getRGB(ceilX, floorZ) >> 16) & 0xff;
-        float y3 = (value / 255f) * yScale;
-        value = (image.getRGB(ceilX, ceilZ) >> 16) & 0xff;
-        float y4 = (value / 255f) * yScale;
-        // Bilinear interpolation
-        float y13 = ((ceilX - rasterX) / (ceilX - floorX)) * y1 + ((rasterX - floorX) / (ceilX - floorX)) * y3;
-        float y24 = ((ceilX - rasterX) / (ceilX - floorX)) * y2 + ((rasterX - floorX) / (ceilX - floorX)) * y4;
-        float result = ((ceilZ - rasterZ) / (ceilZ - floorZ)) * y13 + ((rasterZ - floorZ) / (ceilZ - floorZ)) * y24;
-        return result;
-    }
-
     private Vector2f modelLocationFromGrid(int gridX, int gridZ) {
         float x = (float)gridX/((float)resolution - 1) * width - width / 2;
         float z = (float)gridZ/((float)resolution - 1) * height - height / 2;
         return new Vector2f(x, z);
-    }
-
-    /**
-     * With the height map loaded,
-     * construct the model by sampling based on parameters
-     */
-    private void generateModelFromRaster() {
-        heights = new float[resolution][resolution];
-        int vertexCount = resolution * resolution;
-        float vertices[] = new float[vertexCount * 3];
-        float normals[] = new float[vertexCount * 3];
-        float textureCoords[] = new float[vertexCount * 2];
-        int[] indices = new int[6*(resolution-1)*(resolution-1)];
-        int vertexPointer = 0;
-        for(int i = 0 ;i < resolution; i++){
-            for(int j = 0; j < resolution; j++){
-                // Positions
-                Vector2f loc = modelLocationFromGrid(j, i);
-                float x = loc.x; float z = loc.y;
-                float sampleHeight = sampleModelFromHeightmap(x, z);
-                heights[j][i] = sampleHeight;
-                vertices[vertexPointer*3] = x;
-                vertices[vertexPointer*3+1] = sampleHeight;
-                vertices[vertexPointer*3+2] = z;
-
-                // Normals
-                float x_prev = (float)Math.max(j - 1, 0)/((float)resolution - 1) * width - width / 2;
-                float x_next = (float)Math.min(j + 1, resolution - 1)/((float)resolution - 1) * width - width / 2;
-                float z_prev = (float)Math.max(i - 1, 0)/((float)resolution - 1) * height - height / 2;
-                float z_next = (float)Math.min(i + 1, resolution - 1)/((float)resolution - 1) * height - height / 2;
-                // The points to consider
-                Vector3f current = new Vector3f(x, sampleModelFromHeightmap(x,z), z);
-                Vector3f prev_x = new Vector3f(x_prev, sampleModelFromHeightmap(x_prev, z), z);
-                Vector3f next_x = new Vector3f(x_next, sampleModelFromHeightmap(x_next, z), z);
-                Vector3f prev_z = new Vector3f(x, sampleModelFromHeightmap(x, z_prev), z_prev);
-                Vector3f next_z = new Vector3f(x, sampleModelFromHeightmap(x, z_next), z_next);
-                // Vectors from current to the other points, grid aligned
-                Vector3f xn = new Vector3f(); Vector3f xp = new Vector3f();
-                Vector3f zn = new Vector3f(); Vector3f zp = new Vector3f();
-                prev_x.sub(current, xp); next_x.sub(current, xn);
-                prev_z.sub(current, zp); next_z.sub(current, zn);
-                // Get average vector for both dimensions
-                Vector3f avg_x = new Vector3f(); Vector3f avg_z = new Vector3f();
-                float angle_x = 0; float angle_z = 0;
-                angle_x = xn.angle(xp); angle_z = zn.angle(zp);
-                if (next_x.y <= current.y || prev_x.y <= current.y) angle_x = (float) Math.PI * 2 - angle_x;
-                if (next_z.y <= current.y || prev_z.y <= current.y) angle_z = (float) Math.PI * 2 - angle_z;
-                xn.rotateZ(angle_x / 2f, avg_x); avg_x.normalize();
-                zn.rotateX(-angle_z / 2f, avg_z); avg_z.normalize();
-
-                Vector3f normal = new Vector3f();
-                avg_x.add(avg_z, normal); normal.div(2f);
-                normals[vertexPointer*3] = normal.x;
-                normals[vertexPointer*3+1] = normal.y;
-                normals[vertexPointer*3+2] = normal.z;
-
-                // Texture coords
-                textureCoords[vertexPointer*2] = (float)j/((float)resolution - 1);
-                textureCoords[vertexPointer*2+1] = (float)i/((float)resolution - 1);
-                vertexPointer++;
-            }
-        }
-        // Indices
-        int pointer = 0;
-        for(int gz=0;gz<resolution-1;gz++){
-            for(int gx=0;gx<resolution-1;gx++){
-                int topLeft = (gz*resolution)+gx;
-                int topRight = topLeft + 1;
-                int bottomLeft = ((gz+1)*resolution)+gx;
-                int bottomRight = bottomLeft + 1;
-                indices[pointer++] = topLeft;
-                indices[pointer++] = bottomLeft;
-                indices[pointer++] = topRight;
-                indices[pointer++] = topRight;
-                indices[pointer++] = bottomLeft;
-                indices[pointer++] = bottomRight;
-            }
-        }
-        if (Thread.currentThread().getName() != "main") {
-            readyToRender = false;
-            return;
-        }
-        this.model = Loader.loadToVAO(vertices, textureCoords, normals, indices);
     }
 
     /**

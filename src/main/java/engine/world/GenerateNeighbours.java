@@ -84,7 +84,7 @@ public class GenerateNeighbours implements Runnable {
                     original.getPosition().z + relativeOffsetFromIndex(i).y * original.getHeight()
             );
             // Add the neighbour
-            world.neighbours[i] = new Terrain("", original.getWidth(), original.getHeight(),
+            world.neighbours[i] = new Terrain(original.getWidth(), original.getHeight(),
                     original.getyScale(), original.getResolution(), original.getPosition().add(translation, new Vector3f()),
                     original.getTexturePack(), offset.x, offset.y, world.getWater().getLevel());
         }
@@ -153,7 +153,7 @@ public class GenerateNeighbours implements Runnable {
                                 center.getPosition().y,
                                 relativeOffsetFromIndex(i).y * center.getHeight()
                         );
-                        arr[i] = new Terrain("", original.getWidth(), original.getHeight(),
+                        arr[i] = new Terrain(original.getWidth(), original.getHeight(),
                                 original.getyScale(), original.getResolution(), center.getPosition().add(translation, new Vector3f()),
                                 original.getTexturePack(), offset.x, offset.y, world.getWater().getLevel());
                     }

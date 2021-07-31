@@ -3,6 +3,7 @@
 in vec2 pass_textureCoords;
 in vec3 pass_position;
 in vec3 pass_normal;
+in float visibility;
 
 out vec4 pixel_colour;
 
@@ -15,6 +16,7 @@ uniform sampler2D blendMap;
 
 // World stuff
 uniform float waterLevel;
+uniform vec3 skyColour;
 
 // Light stuff
 uniform int numberOfLights;
@@ -62,9 +64,10 @@ void main() {
     vec4 finalTextureColour = sandness * texture(gTexture, tiledTextureCoords) + (1 - sandness) * texture(backgroundTexture, tiledTextureCoords);
     // Steep slopes are rocky
     float rockiness = abs(dot(normalize(pass_normal), vec3(0, 1, 0)));
-    rockiness = min(1 - rockiness + 0.35f, 1);
+    rockiness = min(1 - rockiness + 0.45f, 1);
     rockiness = pow(rockiness, 15);
     finalTextureColour = rockiness * texture(bTexture, tiledTextureCoords) + (1 - rockiness) * finalTextureColour;
 
     pixel_colour = pixel_colour * finalTextureColour;
+    pixel_colour = pixel_colour * visibility + vec4(skyColour, 1.0) * (1 - visibility);
 }

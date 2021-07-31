@@ -3,10 +3,14 @@
 in vec2 pass_textureCoords;
 in vec3 pass_position;
 in vec3 pass_normal;
+in float visibility;
 
 out vec4 pixel_colour;
 
 uniform sampler2D textureSampler;
+
+uniform vec3 skyColour;
+
 // Light stuff
 uniform int numberOfLights;
 uniform vec3 lightPositions[256];
@@ -48,4 +52,5 @@ void main() {
     vec2 texCoord = mod(pass_position.xz / 10, 1);
     // Apply texture
     pixel_colour = pixel_colour * texture(textureSampler, texCoord);
+    pixel_colour = pixel_colour * visibility + vec4(skyColour, 1.0) * (1 - visibility);
 }

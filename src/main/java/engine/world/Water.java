@@ -3,6 +3,7 @@ package engine.world;
 import engine.Loader;
 import engine.graphics.Light;
 import engine.graphics.Material;
+import engine.graphics.Renderer;
 import engine.graphics.models.Model;
 import engine.graphics.shaders.Shader;
 import engine.graphics.shaders.WaterShader;
@@ -58,9 +59,10 @@ public class Water {
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
+        shader.setUniform("skyColour", Renderer.skyColour);
         // Matrices to set
         shader.setUniform("transformationMatrix", Utility.createTransformationMatrix(
-                new Vector3f(position.x, level, position.y),
+                new Vector3f(position.x, level, position.z),
                 new Vector3f(0),
                 new Vector3f(1))
         );
